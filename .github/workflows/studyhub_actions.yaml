@@ -43,10 +43,17 @@ jobs:
             StrictHostKeyChecking no
           END
 
+      - uses: pCYSl5EDgo/cat@master
+        id: hello
+        with:
+          path: docker-compose.yaml
+
+      - run: echo $TEXT
+        env:
+          TEXT: ${{ steps.hello.outputs.text }}
+
       - name: Copy docker-compose to vm
-        run: |
-          cat docker-compose.yaml
-          scp docker-compose.yaml staging:~/docker-compose.yaml
+        run: scp docker-compose.yaml staging:~/docker-compose.yaml
 
       - name: Run deploy.sh
         run: envsubst < deploy.sh | ssh staging sh
