@@ -45,8 +45,20 @@ jobs:
 
       - uses: actions/checkout@master
 
+      - name: Show env
+        run: env > env.txt
+
       - name: Generate docker-compose with env vars
         run: (envsubst < docker-compose.yaml) > docker-compose2.yaml
+
+      - uses: pCYSl5EDgo/cat@master
+        id: hello
+        with:
+          path: env.txt
+
+      - run: echo $TEXT
+        env:
+          TEXT: ${{ steps.hello.outputs.text }}
 
       - name: Copy docker-compose to vm
         run: scp docker-compose2.yaml staging:~/docker-compose.yaml
