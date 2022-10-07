@@ -37,12 +37,12 @@ jobs:
             StrictHostKeyChecking no
           END
         env:
-          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
-          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
-          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Copy docker-compose to vm
-        run: scp -o StrictHostKeyChecking=no docker-compose.yaml "$SERVER_USERNAME"@"$SERVER_IP":~/
+        run: scp -o StrictHostKeyChecking=no docker-compose.yaml "$SSH_USER"@"SSH_HOST":~/
 
       - name: Run deploy.sh
-        run: envsubst < deploy.sh | ssh -o StrictHostKeyChecking=no "$SERVER_USERNAME"@"$SERVER_IP" sh
+        run: envsubst < deploy.sh | ssh -o StrictHostKeyChecking=no "$SSH_USER"@"SSH_HOST" sh
