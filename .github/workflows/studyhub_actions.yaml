@@ -24,6 +24,10 @@ jobs:
     name: "Deploy to staging"
     runs-on: [ubuntu-latest]
     needs: [docker-build]
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
     steps:
       - name: Configure SSH
         run: |
@@ -37,13 +41,9 @@ jobs:
             IdentityFile ~/.ssh/staging.key
             StrictHostKeyChecking no
           END
-        env:
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Copy docker-compose to vm
-        run: scp -o StrictHostKeyChecking=no docker-compose.yaml "${{ secrets.SSH_USER }}"@"{{ secrets.SSH_HOST }}":~/
+        run: scp -o StrictHostKeyChecking=no docker-compose.yaml "$SSH_USER"@"$SSH_HOST":~/
 
       - name: Run deploy.sh
-        run: envsubst < deploy.sh | ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USER }}"@"{{ secrets.SSH_HOST }}" sh
+        run: envsubst < deploy.sh | ssh -o StrictHostKeyChecking=no "$SSH_USER"@"$SSH_HOST" sh
