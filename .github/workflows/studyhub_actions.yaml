@@ -43,6 +43,8 @@ jobs:
             StrictHostKeyChecking no
           END
 
+      - uses: actions/checkout@master
+
       - uses: pCYSl5EDgo/cat@master
         id: hello
         with:
