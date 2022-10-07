@@ -43,7 +43,7 @@ jobs:
           END
 
       - name: Copy docker-compose to vm
-        run: scp docker-compose.yaml staging:~/
+        run: scp "docker-compose.yaml" staging:~/
 
       - name: Run deploy.sh
         run: envsubst < deploy.sh | ssh staging sh
