@@ -45,7 +45,7 @@ jobs:
 
       - name: Copy docker-compose to vm
         run: |
-          ls
+          cat docker-compose.yaml
           scp docker-compose.yaml staging:~/docker-compose.yaml
 
       - name: Run deploy.sh
