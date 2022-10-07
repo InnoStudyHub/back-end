@@ -49,4 +49,4 @@ jobs:
         run: scp docker-compose.yaml staging:~/docker-compose-wo-env.yaml
 
       - name: Run deploy.sh
-        run: envsubst < deploy.sh | ssh staging DOCKER_LOGIN=$DOCKER_LOGIN sh
+        run: deploy.sh | ssh staging DOCKER_LOGIN=$DOCKER_LOGIN sh
