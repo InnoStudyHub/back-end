@@ -43,7 +43,7 @@ jobs:
           END
 
       - name: Copy docker-compose to vm
-        run: scp -o StrictHostKeyChecking=no docker-compose.yaml "$SSH_USER"@"$SSH_HOST":~/
+        run: scp docker-compose.yaml staging:~/
 
       - name: Run deploy.sh
-        run: envsubst < deploy.sh | ssh -o StrictHostKeyChecking=no "$SSH_USER"@"$SSH_HOST" sh
+        run: envsubst < deploy.sh | ssh staging sh
