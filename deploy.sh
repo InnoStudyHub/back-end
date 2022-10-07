@@ -5,7 +5,7 @@ pkill -f runserver
 
 set -o allexport
 source .ssh/environment
-(envsubst < deploy.sh) > docker-compose.yaml
+(envsubst < docker-compose-wo-env.yaml) > docker-compose.yaml
 
 sudo docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
 sudo docker system prune --all -f
