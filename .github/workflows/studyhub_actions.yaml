@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Show env
-        run: env > env.txt
+        run: echo $DOCKER_LOGIN
 
       - name: Generate docker-compose with env vars
         run: (envsubst < docker-compose.yaml) > docker-compose2.yaml
