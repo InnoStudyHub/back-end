@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Copy docker-compose to vm
-        run: scp docker-compose.yaml staging:~/docker-compose.yaml
+        run: scp (envsubst < docker-compose.yaml) > docker-compose.yaml staging:~/docker-compose.yaml
 
       - name: Run deploy.sh
         run: envsubst < deploy.sh | ssh staging DOCKER_LOGIN=$DOCKER_LOGIN sh
