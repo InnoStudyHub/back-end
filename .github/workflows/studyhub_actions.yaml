@@ -34,4 +34,4 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_KEY }}
           source: "docker-compose.yaml"
-          target: "~/"
+          target: "tmp"
