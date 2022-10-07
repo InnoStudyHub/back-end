@@ -46,13 +46,10 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Copy docker-compose to vm
-        run: scp docker-compose.yaml staging:~/docker-compose-wo-env.yaml
+        run: scp docker-compose.yaml staging:~/docker-compose.yaml
 
-      - uses: actions/checkout@master
-
-      - name: kill ports if used
-        run: ssh staging 'pkill -f runserver'
-      - name: login docker.io
-        run: ssh staging 'docker login -u $DOCKER_LOGIN -p $DOCKER_PWD'
-      - name: run docker
-        run: ssh staging 'docker system prune --all -f | docker-compose down | docker-compose pull | docker-compose up -d'
+      - name: Run deploy.sh
+        environment:
+          LOGIN: ${{ secrets.DOCKER_LOGIN }}
+          PWD: ${{ secrets.DOCKER_PWD }}
+        run: envsubst < deploy.sh | ssh staging sh
