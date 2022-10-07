@@ -41,7 +41,6 @@ jobs:
             User $SSH_USER
             IdentityFile ~/.ssh/staging.key
             StrictHostKeyChecking no
-            PermitUserEnvironment yes
           END
 
       - uses: actions/checkout@master
