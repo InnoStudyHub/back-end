@@ -6,7 +6,7 @@ services:
             bash -c "python manage.py makemigrations
             && python manage.py migrate
             && python manage.py runserver 0.0.0.0:8000"
-    image: ${DOCKER_LOGIN}/${DOCKER_NAME}:studyhub_back
+    image: diazzzu/studyhub:studyhub_back
     ports:
       - "8000:8000"
     restart: on-failure

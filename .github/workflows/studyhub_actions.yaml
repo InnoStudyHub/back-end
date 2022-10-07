@@ -50,5 +50,9 @@ jobs:
 
       - uses: actions/checkout@master
 
-      - name: Run deploy.sh
-        run: ssh staging DOCKER_LOGIN=$DOCKER_LOGIN sh deploy.sh
+      - name: kill ports if used
+        run: ssh staging 'pkill -f runserver'
+      - name: login docker.io
+        run: ssh staging 'docker login -u $DOCKER_LOGIN -p $DOCKER_PWD'
+      - name: run docker
+        run: ssh staging 'docker system prune --all -f | docker-compose down | docker-compose pull | docker-compose up -d'
