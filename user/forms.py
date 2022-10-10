@@ -1,25 +1,17 @@
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from rest_framework.exceptions import ValidationError
+from rest_framework.validators import UniqueValidator
+
 from user.models import User
 
-class RegisterForm(UserCreationForm):
-    password = forms.CharField(label='password', widget=forms.PasswordInput)
+class UploadFileForm(forms.Form):
+    title = forms.CharField(max_length=255)
 
-    class Meta(UserCreationForm.Meta):
-        model = User
-        fields = ('email', 'fullname')
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        qs = User.objects.filter(email=email)
-        if qs.exists():
-            raise forms.ValidationError(f"User with {email} already exists")
-        return
-
-    def save(self, commit=True):
-        user = User.objects.create_user(
-            self.cleaned_data['email'],
-            self.cleaned_data['fullname'],
-            self.cleaned_data['password']
-        )
-        return user
+    def clean(self):
+        cleaned_data = self.data
+        for obj in cleaned_data:
+            if obj == 'title':
+                continue
+            if cleaned_data[obj].content_type is None or cleaned_data[obj].content_type.split('/')[0] != 'image':
+                raise ValidationError("Some file/files is not image")

@@ -2,6 +2,7 @@ version: "2"
 
 services:
   app:
+    #build: .
     command: >
             bash -c "python manage.py makemigrations
             && python manage.py migrate
@@ -12,6 +13,8 @@ services:
     restart: on-failure
     depends_on:
       - db
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: './google_cloud_key.json'
   db:
     image: mysql:8.0
     container_name: db
