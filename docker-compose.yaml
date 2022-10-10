@@ -14,7 +14,7 @@ services:
     depends_on:
       - db
     environment:
-      GOOGLE_APPLICATION_CREDENTIALS: '.data/google_cloud_key.json'
+      GOOGLE_APPLICATION_CREDENTIALS: 'google_cloud_key.json'
   db:
     image: mysql:8.0
     container_name: db
