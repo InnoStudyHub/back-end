@@ -97,7 +97,7 @@ DATABASES = {
         'NAME': 'studyhub_dev',
         'USER': 'diazzzu',
         'PASSWORD': 'pass1234',
-        'HOST': '0.0.0.0',
+        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
