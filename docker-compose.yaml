@@ -3,6 +3,11 @@ version: "2"
 services:
   app:
     #build: .
+    environment:
+      - DEBUG='True'
+      - DBHOST='db'
+      - GOOGLE_APPLICATION_CREDENTIALS='google_cloud_key.json'
+      - GC_KEY=${GCKEY}
     command: >
             bash -c "echo $GC_KEY && python manage.py makemigrations
             && python manage.py migrate
@@ -13,10 +18,6 @@ services:
     restart: on-failure
     depends_on:
       - db
-    environment:
-      DEBUG: 'True'
-      DBHOST: 'db'
-      GOOGLE_APPLICATION_CREDENTIALS: 'google_cloud_key.json'
   db:
     image: mysql:8.0
     container_name: db
