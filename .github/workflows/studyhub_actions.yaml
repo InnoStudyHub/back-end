@@ -48,11 +48,6 @@ jobs:
 
       - uses: actions/checkout@master
 
-      - name: Copy google cloud key to vm
-        run: |
-          echo "$GCKEY" > google_cloud_key.json
-          scp google_cloud_key.json staging:~/
-
       - name: Copy docker-compose to vm
         run: scp docker-compose.yaml staging:~/docker-compose.yaml
 
