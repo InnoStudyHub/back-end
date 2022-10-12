@@ -33,6 +33,7 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       PWD: ${{ secrets.DOCKER_PWD }}
+      GC_KEY: ${{ secrets.GCKEY }}
     steps:
       - name: Configure SSH
         run: |
@@ -54,5 +55,5 @@ jobs:
 
       - name: Run deploy.sh
         env:
-          GCKEY: ${{ secrets.GCKEY }}
+          GC_KEY: ${{ secrets.GCKEY }}
         run: envsubst < deploy.sh | ssh staging sh
