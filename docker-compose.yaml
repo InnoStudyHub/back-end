@@ -13,4 +13,3 @@ services:
     restart: on-failure
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: 'google_cloud_key.json'
-
