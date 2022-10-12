@@ -7,7 +7,7 @@ services:
       - DEBUG='True'
       - DBHOST='db'
       - GOOGLE_APPLICATION_CREDENTIALS='google_cloud_key.json'
-      - GC_KEY=${GCKEY}
+      - GC_KEY=${GC_KEY}
     command: >
             bash -c "echo $GC_KEY && python manage.py makemigrations
             && python manage.py migrate

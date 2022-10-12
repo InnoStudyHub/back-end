@@ -6,4 +6,4 @@ WORKDIR /studyhub
 COPY . .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-RUN echo ${GCKEY} > google_cloud_key.json
+RUN echo ${GC_KEY} > google_cloud_key.json
