@@ -53,4 +53,6 @@ jobs:
         run: scp docker-compose.yaml staging:~/docker-compose.yaml
 
       - name: Run deploy.sh
+        env:
+          GCKEY: ${{ secrets.GCKEY }}
         run: envsubst < deploy.sh | ssh staging sh
