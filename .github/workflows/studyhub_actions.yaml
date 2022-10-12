@@ -12,6 +12,7 @@ jobs:
     env:
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       NAME: ${{ secrets.DOCKER_NAME }}
+      GCKEY: ${{ secrets.GCKEY }}
     steps:
       - name: Login to docker.io
         run:  echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
@@ -31,7 +32,6 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       PWD: ${{ secrets.DOCKER_PWD }}
-      GCKEY: ${{ secrets.GCKEY }}
     steps:
       - name: Configure SSH
         run: |

@@ -22,13 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 import os
 
-if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') == None:
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/diazzzu/PycharmProjects/studyhub/.data/google_cloud_key.json'
-
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY','django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', "True") == "True"
 
 ALLOWED_HOSTS = ['*']
 
@@ -97,7 +94,7 @@ DATABASES = {
         'NAME': 'studyhub_dev',
         'USER': 'diazzzu',
         'PASSWORD': 'pass1234',
-        'HOST': 'db',
+        'HOST': os.environ.get('DBHOST', "0.0.0.0"),
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"

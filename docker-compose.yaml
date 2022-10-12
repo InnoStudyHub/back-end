@@ -4,7 +4,7 @@ services:
   app:
     #build: .
     command: >
-            bash -c "python manage.py makemigrations
+            bash -c "cat google_cloud_key.json && python manage.py makemigrations
             && python manage.py migrate
             && python manage.py runserver 0.0.0.0:8000"
     image: diazzzu/studyhub:studyhub_back
@@ -14,6 +14,8 @@ services:
     depends_on:
       - db
     environment:
+      DEBUG: 'True'
+      DBHOST: 'db'
       GOOGLE_APPLICATION_CREDENTIALS: 'google_cloud_key.json'
   db:
     image: mysql:8.0
