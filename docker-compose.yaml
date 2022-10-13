@@ -12,6 +12,8 @@ services:
             && python manage.py migrate
             && python manage.py runserver 0.0.0.0:8000"
     image: diazzzu/studyhub:studyhub_back
+    volumes:
+      - /google_cloud_key.json:/studyhub
     ports:
       - "8000:8000"
     restart: on-failure
