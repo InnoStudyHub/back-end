@@ -2,16 +2,16 @@ version: "2"
 
 services:
   app:
-    build: .
+    #build: .
     environment:
       - DEBUG=True
       - DBHOST=db
-      - GOOGLE_APPLICATION_CREDENTIALS=google_cloud_key.json
+      - GOOGLE_APPLICATION_CREDENTIALS=data/google_cloud_key.json
     command: >
             bash -c "python manage.py makemigrations
             && python manage.py migrate
             && python manage.py runserver 0.0.0.0:8000"
-    #image: diazzzu/studyhub:studyhub_back
+    image: diazzzu/studyhub:studyhub_back
     volumes:
       - .data:/studyhub/data
     ports:
