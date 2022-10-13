@@ -53,5 +53,3 @@ jobs:
       - name: Run deploy.sh
         run: envsubst < deploy.sh | ssh staging sh
 
-      - name: Copy googleKey
-        run: ssh staging "sudo docker-compose cp google_cloud_key.json app:/studyhub"
