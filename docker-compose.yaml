@@ -2,7 +2,7 @@ version: "2"
 
 services:
   app:
-    #build: .
+    build: .
     environment:
       - DEBUG=True
       - DBHOST=db
@@ -11,9 +11,9 @@ services:
             bash -c "python manage.py makemigrations
             && python manage.py migrate
             && python manage.py runserver 0.0.0.0:8000"
-    image: diazzzu/studyhub:studyhub_back
+    #image: diazzzu/studyhub:studyhub_back
     volumes:
-      - /.data:/studyhub
+      - .data:/studyhub/data
     ports:
       - "8000:8000"
     restart: on-failure
