@@ -18,8 +18,6 @@ jobs:
       - uses: actions/checkout@master
       - name: Build image
         run: docker build -t $LOGIN/$NAME:studyhub_back .
-        env:
-          GCKEY: ${{ secrets.GCKEY }}
       - name: Push image to docker.io
         run: docker push $LOGIN/$NAME:studyhub_back
 
@@ -33,7 +31,6 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       PWD: ${{ secrets.DOCKER_PWD }}
-      GC_KEY: ${{ secrets.GCKEY }}
     steps:
       - name: Configure SSH
         run: |
@@ -55,3 +52,6 @@ jobs:
 
       - name: Run deploy.sh
         run: envsubst < deploy.sh | ssh staging sh
+
+      - name: Copy googleKey
+        run: ssh staging "sudo docker-compose cp google_cloud_key.json app:/studyhub"
