@@ -16,10 +16,10 @@ class Deck(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class Card(models.Model):
-    question_description = models.CharField(max_length=1024, blank=False, null=True)
-    question_image = models.CharField(max_length=1024, blank=False, null=True)
-    answer_description = models.CharField(max_length=1024, blank=False, null=True)
-    question_images = models.JSONField(blank=False, null=True)
+    question_description = models.CharField(max_length=1024, null=True)
+    question_image = models.CharField(max_length=1024, null=True)
+    answer_description = models.CharField(max_length=1024, null=True)
+    answer_images = models.JSONField(null=True)
     deck = models.ForeignKey(Deck, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

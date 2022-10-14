@@ -14,6 +14,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     )
 
     password = serializers.CharField(
+        required=True,
         max_length=128,
         min_length=8,
         write_only=True,
@@ -35,6 +36,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    fullname = serializers.CharField()
     class Meta:
         model = User
         fields = ('email', 'fullname')

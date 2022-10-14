@@ -1,11 +1,13 @@
 from django.http import HttpResponse
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.generics import RetrieveAPIView
+from rest_framework.generics import RetrieveAPIView, GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils import json
 from rest_framework.views import APIView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
@@ -17,10 +19,14 @@ from .serializers import RegistrationSerializer
 from google.cloud import storage
 
 
-class RegistrationAPIView(APIView):
+class RegistrationAPIView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = RegistrationSerializer
 
+    @extend_schema(
+        request=RegistrationSerializer,
+        responses={201: TokenObtainPairSerializer},
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -35,13 +41,20 @@ class MyObtainTokenPairView(TokenObtainPairView):
     permission_classes = (AllowAny,)
     serializer_class = MyTokenObtainPairSerializer
 
+    @extend_schema(
+        request=MyTokenObtainPairSerializer,
+        responses={201: TokenObtainPairSerializer},
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, args, kwargs)
 
-class UserAPIView(RetrieveAPIView):
+
+class UserAPIView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
 
-    def get_object(self):
-        return self.request.user
+    def get(self, request, *args, **kwargs):
+        return HttpResponse(self.request.user, content_type="application/json")
 
 def upload_blob_from_memory(bucket_name, contents, destination_blob_name):
     storage_client = storage.Client()
@@ -57,9 +70,7 @@ def upload_file(request):
     if request.method == 'POST':
         form = UploadFileForm(data=request.data, files=request.FILES)
         if form.is_valid():
-            for x in form.data:
-                if x == 'title':
-                    continue
+            for x in form.files:
                 upload_blob_from_memory('studyhub-data', form.data[x].read(), 'file/'+form.data[x].name)
 
     return HttpResponse('Upload successfully')
