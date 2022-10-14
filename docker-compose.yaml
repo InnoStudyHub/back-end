@@ -10,7 +10,7 @@ services:
       - DB_HOST=127.0.0.1
       - DB_USER=diazzzu
       - DB_PASSWORD=pass1234
-      - DEBUG=True
+      - DEBUG=False
       - GOOGLE_APPLICATION_CREDENTIALS=data/google_cloud_key.json
     command: >
             bash -c "python manage.py makemigrations && python manage.py migrate 

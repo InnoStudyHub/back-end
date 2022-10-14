@@ -103,11 +103,11 @@ WSGI_APPLICATION = 'studyhub.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_HOST', 'studyhub_dev'),
+        'NAME': os.environ.get('DB_NAME', 'studyhub_dev'),
         'USER': os.environ.get('DB_USER', 'diazzzu'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'pass1234'),
         'HOST': os.environ.get('DB_HOST', '0.0.0.0'),
-        'PORT': os.environ.get('DB_HOST', '3306'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         }
