@@ -18,13 +18,6 @@ class DeckCreateView(CreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = DeckCreateSerializer
 
-    @extend_schema(
-        request=DeckRequestTemplateSerializer,
-        responses={
-            200: DeckResponseTemplateSerializer,
-            400: None
-        }
-    )
     def createPostResponse(self, deck):
         cards = deck.card_set.all()
         response_data = deck.__dict__
@@ -37,6 +30,13 @@ class DeckCreateView(CreateAPIView):
 
         return Response(deck_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        request=DeckRequestTemplateSerializer,
+        responses={
+            200: DeckResponseTemplateSerializer,
+            400: None
+        }
+    )
     def post(self, request, *args, **kwargs):
         user = request.user
         serializer = self.serializer_class(data=json.loads(request.data['data']))
@@ -53,7 +53,8 @@ class FolderCreateView(CreateAPIView):
 
     @extend_schema(
         responses={
-            200: None
+            200: FolderCreateSerializer,
+            400: None
         }
     )
     def post(self, request, *args, **kwargs):
