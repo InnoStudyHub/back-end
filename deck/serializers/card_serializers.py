@@ -4,15 +4,6 @@ from rest_framework.exceptions import ValidationError
 
 from deck.models import Deck, Card
 
-def uploadPublicFileToStorage(bucket_name, contents, destination_blob_name):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
-
-    blob.upload_from_string(contents)
-    blob.make_public()
-    return blob.public_url
-
 class CardCreateSerializer(serializers.Serializer):
     question_text = serializers.CharField(max_length=1024)
     question_image_key = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
@@ -25,6 +16,15 @@ class CardCreateSerializer(serializers.Serializer):
     def isImage(self, image):
         return (image.content_type is not None and image.content_type.split('/')[0] == 'image')
 
+    def uploadPublicFileToStorage(self, bucket_name, contents, destination_blob_name):
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(destination_blob_name)
+
+        blob.upload_from_string(contents)
+        blob.make_public()
+        return blob.public_url
+
     def uploadImage(self, validated_data, image_key):
         files = validated_data['files']
         deck_id = validated_data['deck_id']
@@ -33,7 +33,7 @@ class CardCreateSerializer(serializers.Serializer):
         folder_name = deck.folder.folder_name
         deck_name = deck.deck_name
         store_path = f'deck/{folder_name}/{deck_name}/{image_key}_{file.name}'
-        return uploadPublicFileToStorage('studyhub-data', file.read(), store_path)
+        return self.uploadPublicFileToStorage('studyhub-data', file.read(), store_path)
 
     def getQuestionImageUrl(self, validated_data):
         question_image_key = validated_data['question_image_key']
@@ -63,10 +63,17 @@ class CardCreateSerializer(serializers.Serializer):
         answer_image_urls = self.getAnswerImageUrls(validated_data=validated_data)
 
         return Card.objects.create(deck_id=deck_id,
-                            question_text=validated_data['question_text'], answer_text=validated_data['answer_text'],
-                            question_image=question_image_url, answer_images=answer_image_urls)
+                                   question_text=validated_data['question_text'],
+                                   answer_text=validated_data['answer_text'],
+                                   question_image=question_image_url, answer_images=answer_image_urls)
 
-class CardResponseTemplateSerializer(serializers.ModelSerializer):
+
+class CardDetailSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    question_text = serializers.CharField(max_length=1024)
+    question_image = serializers.CharField(max_length=1024)
+    answer_text = serializers.CharField(max_length=1024)
+    answer_images = serializers.JSONField()
+
     class Meta:
-        model = Card
-        fields = ['question_text', 'question_image', 'answer_text', 'answer_images']
+        fields = ['id', 'question_text', 'question_image', 'answer_text', 'answer_images']

@@ -1,50 +1,75 @@
-from django.http import HttpResponse
-from django.shortcuts import render
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from django import forms
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
+from rest_framework import status, viewsets, fields
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import CreateAPIView
-from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils import json
 
-from deck.deck_serializer import DeckCreateSerializer, DeckResponseTemplateSerializer, DeckRequestTemplateSerializer
-from deck.folder_serializers import FolderCreateSerializer
-from deck.forms import DeckCreateForm
+from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
+    DeckListSerializer, DeckDetailSerializer
+from deck.serializers.folder_serializers import FolderCreateSerializer
+from deck.models import Deck
 
+def getDeckData(deck):
+    cards = deck.card_set.all()
+    data = deck.__dict__
+    data['cards'] = []
+    for card in cards:
+        data['cards'].append(card.__dict__)
+    serializer = DeckDetailSerializer(data=data)
+    if not serializer.is_valid(raise_exception=True):
+        raise ValidationError(serializer.error_messages)
+    return serializer.data
 
-class DeckCreateView(CreateAPIView):
+def getDecks(filter):
+    return Deck.objects.all().filter(**filter)
+
+class DeckViewSet(viewsets.ViewSet):
     permission_classes = (IsAuthenticated,)
-    serializer_class = DeckCreateSerializer
-
-    def createPostResponse(self, deck):
-        cards = deck.card_set.all()
-        response_data = deck.__dict__
-        response_data['cards'] = []
-        for card in cards:
-            response_data['cards'].append(card.__dict__)
-        deck_serializer = DeckResponseTemplateSerializer(data=response_data)
-        if deck_serializer.is_valid():
-            return Response(deck_serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response(deck_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        request=DeckRequestTemplateSerializer,
+        description='Create deck request',
+        request=DeckRequestSerializer,
         responses={
-            200: DeckResponseTemplateSerializer,
-            400: None
+            201: DeckDetailSerializer,
+            (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist"),
+            (403, 'text/plain'): OpenApiResponse(description="Deck with this name exist")
         }
     )
-    def post(self, request, *args, **kwargs):
+    def create(self, request):
         user = request.user
-        serializer = self.serializer_class(data=json.loads(request.data['data']))
-        if serializer.is_valid():
+        serializer = DeckCreateSerializer(data=json.loads(request.data['data']))
+        if serializer.is_valid(raise_exception=True):
             serializer.save(author_id=user.id, files=request.data)
-            return self.createPostResponse(serializer.instance)
+            response_data = getDeckData(serializer.instance)
+            return Response(response_data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(serializer.error_messages)
+
+    @extend_schema(
+        description='Get all decks list by filter and query',
+        request=DeckListSerializer,
+        responses={
+            200: DeckDetailSerializer(many=True),
+            (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist"),
+        }
+    )
+    def list(self, request):
+        filter = {}
+        if request.data.get('filter'):
+            filter = request.data['filter']
+        query = ""
+        if request.data.get('query'):
+            query = request.data['query']
+        decks = getDecks(filter)
+        decks_data = []
+        for deck in decks:
+            if query in deck.deck_name:
+                decks_data.append(getDeckData(deck))
+        return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_CREATED)
+
 
 
 class FolderCreateView(CreateAPIView):
@@ -53,14 +78,14 @@ class FolderCreateView(CreateAPIView):
 
     @extend_schema(
         responses={
-            200: FolderCreateSerializer,
-            400: None
+            201: FolderCreateSerializer,
+            (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist")
         }
     )
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            serializer.save(files=request.files)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

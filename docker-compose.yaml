@@ -2,7 +2,6 @@ version: "2"
 
 services:
   app:
-    #build: .
     image: diazzzu/studyhub:studyhub_back
     environment:
       - DB_PORT=3306
