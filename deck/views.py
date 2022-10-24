@@ -68,7 +68,7 @@ class DeckViewSet(viewsets.ViewSet):
         for deck in decks:
             if query in deck.deck_name:
                 decks_data.append(getDeckData(deck))
-        return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_CREATED)
+        return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
 
 
 

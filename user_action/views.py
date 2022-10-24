@@ -1,13 +1,12 @@
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiExample, OpenApiResponse
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
 from rest_framework import fields, status, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from deck.models import Deck
-from user.models import User
+from deck.serializers.deck_serializer import DeckDetailSerializer
+from deck.views import getDeckData
 
 
 class FavouritesView(viewsets.ViewSet):
@@ -52,3 +51,35 @@ class FavouritesView(viewsets.ViewSet):
 
         user.favourite_decks.remove(Deck.objects.get(id=deck_id))
         return Response("Deck successfully remove from favourites", status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        request=None,
+        responses={
+            (200, 'application/json'): DeckDetailSerializer(many=True)
+        }
+    )
+    def get_favourites(self, request, *args, **kwargs):
+        user = request.user
+        decks = user.favourite_decks.all()
+        decks_data = []
+        for deck in decks:
+            decks_data.append(getDeckData(deck))
+        return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
+
+
+class UserDeckView(viewsets.ViewSet):
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        request=None,
+        responses={
+            (200, 'application/json'): DeckDetailSerializer(many=True)
+        }
+    )
+    def get_user_decks(self, request, *args, **kwargs):
+        user = request.user
+        decks = user.deck_set.all()
+        decks_data = []
+        for deck in decks:
+            decks_data.append(getDeckData(deck))
+        return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)

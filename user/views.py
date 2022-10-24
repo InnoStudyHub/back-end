@@ -1,10 +1,12 @@
 from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.generics import RetrieveAPIView, GenericAPIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .serializers import MyTokenObtainPairSerializer, UserSerializer
@@ -39,6 +41,17 @@ class MyObtainTokenPairView(TokenObtainPairView):
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, args, kwargs)
+
+
+class LogoutAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        user = request.user
+        print(OutstandingToken.objects.filter(user=user))
+        for token in OutstandingToken.objects.filter(user=user).exclude(
+                id__in=BlacklistedToken.objects.filter(token__user=user).values_list('token_id', flat=True)):
+            BlacklistedToken.objects.create(token=token)
+        return Response("Successfully logout", status=status.HTTP_200_OK)
 
 
 class UserAPIView(GenericAPIView):
