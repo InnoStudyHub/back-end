@@ -38,6 +38,7 @@ class DeckCreateSerializer(serializers.Serializer):
                                    folder_id=validated_data['folder_id'], semester=validated_data['semester'])
         for card in validated_data['cards']:
             self.create_card(card=card, deck_id=deck.id, files=validated_data['files'])
+
         return deck
 
 

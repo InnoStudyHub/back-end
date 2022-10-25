@@ -5,10 +5,10 @@ from rest_framework.exceptions import ValidationError
 from deck.models import Deck, Card
 
 class CardCreateSerializer(serializers.Serializer):
-    question_text = serializers.CharField(max_length=1024)
-    question_image_key = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
-    answer_text = serializers.CharField(max_length=1024)
-    answer_image_keys = serializers.ListSerializer(child=serializers.CharField())
+    question_text = serializers.CharField(max_length=1024, required=False)
+    question_image_key = serializers.CharField(max_length=1024, required=False)
+    answer_text = serializers.CharField(max_length=1024, required=False)
+    answer_image_keys = serializers.ListSerializer(child=serializers.CharField(), required=False, allow_empty=True)
 
     class Meta:
         fields = ['question_text', 'question_image_key', 'answer_text', 'answer_image_keys']
@@ -36,6 +36,9 @@ class CardCreateSerializer(serializers.Serializer):
         return self.uploadPublicFileToStorage('studyhub-data', file.read(), store_path)
 
     def getQuestionImageUrl(self, validated_data):
+        if not validated_data.get('question_image_key'):
+            return None
+
         question_image_key = validated_data['question_image_key']
         files = validated_data['files']
 
@@ -46,6 +49,9 @@ class CardCreateSerializer(serializers.Serializer):
         raise ValidationError(f"File with {question_image_key} key is not exist")
 
     def getAnswerImageUrls(self, validated_data):
+        if not validated_data.get('answer_image_keys'):
+            return None
+
         files = validated_data['files']
         answer_image_urls = []
         for answer_key in validated_data['answer_image_keys']:
@@ -62,18 +68,22 @@ class CardCreateSerializer(serializers.Serializer):
         question_image_url = self.getQuestionImageUrl(validated_data=validated_data)
         answer_image_urls = self.getAnswerImageUrls(validated_data=validated_data)
 
-        return Card.objects.create(deck_id=deck_id,
+        print(question_image_url)
+        print(answer_image_urls)
+
+        card = Card.objects.create(deck_id=deck_id,
                                    question_text=validated_data['question_text'],
                                    answer_text=validated_data['answer_text'],
                                    question_image=question_image_url, answer_images=answer_image_urls)
+        return card
 
 
 class CardDetailSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    question_text = serializers.CharField(max_length=1024)
-    question_image = serializers.CharField(max_length=1024)
-    answer_text = serializers.CharField(max_length=1024)
-    answer_images = serializers.JSONField()
+    question_text = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
+    question_image = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
+    answer_text = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
+    answer_images = serializers.JSONField(allow_null=True)
 
     class Meta:
         fields = ['id', 'question_text', 'question_image', 'answer_text', 'answer_images']
