@@ -27,7 +27,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
     def get_token(cls, user):
         token = super(MyTokenObtainPairSerializer, cls).get_token(user)
         token['email'] = user.email
@@ -36,6 +35,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     fullname = serializers.CharField()
+
     class Meta:
         model = User
-        fields = ('email', 'fullname')
+        fields = ('id', 'email', 'fullname')

@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -45,6 +45,13 @@ class MyObtainTokenPairView(TokenObtainPairView):
 
 class LogoutAPIView(APIView):
     permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        request=None,
+        responses={
+            (200, 'text/plain'): OpenApiResponse(description="Successfully logout")
+        },
+    )
     def post(self, request):
         user = request.user
         print(OutstandingToken.objects.filter(user=user))

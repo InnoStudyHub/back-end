@@ -27,7 +27,7 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATIO
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY','django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', "True") == "True"
+DEBUG = os.environ.get('DEBUG', "False") == "True"
 
 ALLOWED_HOSTS = ['*']
 
@@ -53,7 +53,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler'
+    #'EXCEPTION_HANDLER': 'utils.exception_handler.custom_exception_handler'
 }
 
 SPECTACULAR_SETTINGS = {

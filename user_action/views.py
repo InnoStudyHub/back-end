@@ -33,7 +33,7 @@ class FavouritesView(viewsets.ViewSet):
         return Response("Deck successfully add to favourites", status=status.HTTP_201_CREATED)
 
     @extend_schema(
-        request=inline_serializer("FavouritesAdd", {"deck_id": fields.IntegerField()}, many=False),
+        request=inline_serializer("FavouritesRemove", {"deck_id": fields.IntegerField()}, many=False),
         responses={
             (200, 'text/plain'): OpenApiResponse(description="Deck successfully remove from favourites"),
             (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist"),

@@ -3,13 +3,14 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from deck.serializers.card_serializers import CardCreateSerializer, CardDetailSerializer
 from deck.models import Deck, Folder
+from user.models import User
 
 
 class DeckCreateSerializer(serializers.Serializer):
     folder_id = serializers.IntegerField()
     deck_name = serializers.CharField(max_length=1024)
     semester = serializers.CharField(max_length=255)
-    cards = serializers.ListSerializer(child=CardCreateSerializer())
+    cards = serializers.ListSerializer(child=CardCreateSerializer(), allow_empty=True)
 
     class Meta:
         fields = ['deck_name', 'folder_id', 'semester', 'cards']
@@ -22,20 +23,17 @@ class DeckCreateSerializer(serializers.Serializer):
             raise ValidationError("Cards not valid")
 
     def validate_folder_id(self, value):
-        if Folder.objects.get(id=value) is None:
+        if not Folder.objects.filter(id=value):
             raise PermissionDenied(f"Folder does not exist")
         return value
 
-    def validate_deck_name(self, value):
-        data = self.get_initial()
-        decks = Deck.objects.all().filter(folder_id=data['folder_id'], deck_name=value)
-        if len(decks) != 0:
-            raise PermissionDenied(f"Deck with this name exist")
-        return value
-
     def create(self, validated_data):
+        user = User.objects.get(id=validated_data['author_id'])
+        if user.deck_set.all().filter(deck_name=validated_data['deck_name'], folder_id=validated_data['folder_id']):
+            raise ValidationError(f"Deck with name {validated_data['deck_name']} already exist for this user")
+
         deck = Deck.objects.create(deck_name=validated_data['deck_name'], author_id=validated_data['author_id'],
-                                   folder_id=validated_data['folder_id'], semester=validated_data['semester'])
+                                   folder_id=user.id, semester=validated_data['semester'])
         for card in validated_data['cards']:
             self.create_card(card=card, deck_id=deck.id, files=validated_data['files'])
 

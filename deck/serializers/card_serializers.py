@@ -5,9 +5,9 @@ from rest_framework.exceptions import ValidationError
 from deck.models import Deck, Card
 
 class CardCreateSerializer(serializers.Serializer):
-    question_text = serializers.CharField(max_length=1024, required=False)
-    question_image_key = serializers.CharField(max_length=1024, required=False)
-    answer_text = serializers.CharField(max_length=1024, required=False)
+    question_text = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True)
+    question_image_key = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True)
+    answer_text = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True)
     answer_image_keys = serializers.ListSerializer(child=serializers.CharField(), required=False, allow_empty=True)
 
     class Meta:
@@ -32,7 +32,7 @@ class CardCreateSerializer(serializers.Serializer):
         deck = Deck.objects.get(id=deck_id)
         folder_name = deck.folder.folder_name
         deck_name = deck.deck_name
-        store_path = f'deck/{folder_name}/{deck_name}/{image_key}_{file.name}'
+        store_path = f'deck/{folder_name}/{deck_id}_{deck_name}/{image_key}_{file.name}'
         return self.uploadPublicFileToStorage('studyhub-data', file.read(), store_path)
 
     def getQuestionImageUrl(self, validated_data):
@@ -41,8 +41,7 @@ class CardCreateSerializer(serializers.Serializer):
 
         question_image_key = validated_data['question_image_key']
         files = validated_data['files']
-
-        if files.get(question_image_key) is not None:
+        if files.get(question_image_key):
             if not self.isImage(files[question_image_key]):
                 raise ValidationError(f"{question_image_key} file is not image")
             return self.uploadImage(validated_data=validated_data, image_key=question_image_key)
@@ -55,27 +54,23 @@ class CardCreateSerializer(serializers.Serializer):
         files = validated_data['files']
         answer_image_urls = []
         for answer_key in validated_data['answer_image_keys']:
-            if files.get(answer_key) is not None:
+            if files.get(answer_key):
                 if not self.isImage(files[answer_key]):
                     raise ValidationError(f"{answer_key} file is not image")
-                answer_image_urls.append(self.uploadImage(validated_data=validated_data, image_key=answer_key))
             else:
                 raise ValidationError(f"File with {answer_key} key is not exist")
+
+        for answer_key in validated_data['answer_image_keys']:
+            answer_image_urls.append(self.uploadImage(validated_data=validated_data, image_key=answer_key))
         return answer_image_urls
 
     def create(self, validated_data):
         deck_id = validated_data['deck_id']
         question_image_url = self.getQuestionImageUrl(validated_data=validated_data)
         answer_image_urls = self.getAnswerImageUrls(validated_data=validated_data)
-
-        print(question_image_url)
-        print(answer_image_urls)
-
-        card = Card.objects.create(deck_id=deck_id,
-                                   question_text=validated_data['question_text'],
-                                   answer_text=validated_data['answer_text'],
-                                   question_image=question_image_url, answer_images=answer_image_urls)
-        return card
+        return Card.objects.create(deck_id=deck_id, question_text=validated_data['question_text'],
+                                   answer_text=validated_data['answer_text'], question_image=question_image_url,
+                                   answer_images=answer_image_urls)
 
 
 class CardDetailSerializer(serializers.Serializer):
