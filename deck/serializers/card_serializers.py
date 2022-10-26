@@ -5,9 +5,9 @@ from rest_framework.exceptions import ValidationError
 from deck.models import Deck, Card
 
 class CardCreateSerializer(serializers.Serializer):
-    question_text = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True)
-    question_image_key = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True)
-    answer_text = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True)
+    question_text = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True, default="")
+    question_image_key = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True, default="")
+    answer_text = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True, default="")
     answer_image_keys = serializers.ListSerializer(child=serializers.CharField(), required=False, allow_empty=True)
 
     class Meta:

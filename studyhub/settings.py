@@ -27,7 +27,7 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATIO
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY','django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', "False") == "True"
+DEBUG = os.environ.get('DEBUG', "True") == "True"
 
 ALLOWED_HOSTS = ['*']
 
