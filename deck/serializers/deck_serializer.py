@@ -59,6 +59,19 @@ class DeckDetailSerializer(serializers.Serializer):
         fields = ['deck_name', 'folder_id', 'author_id', 'semester', 'cards', 'id']
 
 
+class DeckPreviewSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    folder_id = serializers.IntegerField()
+    author_id = serializers.IntegerField()
+    deck_name = serializers.CharField(max_length=1024)
+    semester = serializers.CharField(max_length=255)
+    cards = serializers.IntegerField()
+    is_favourite = serializers.BooleanField()
+
+    class Meta:
+        fields = ['deck_name', 'folder_id', 'author_id', 'semester', 'cards', 'id', 'is_favourite']
+
+
 class FilterRequestSerializer(serializers.Serializer):
     semester = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
     folder_id = serializers.IntegerField(allow_null=True)

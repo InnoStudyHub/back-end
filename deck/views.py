@@ -41,6 +41,7 @@ class DeckViewSet(viewsets.ViewSet):
     def create(self, request):
         user = request.user
         data = json.loads(request.data['data'])
+        print(data)
         serializer = DeckCreateSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(author_id=user.id, files=request.data)
@@ -70,6 +71,13 @@ class DeckViewSet(viewsets.ViewSet):
             if query in deck.deck_name:
                 decks_data.append(getDeckData(deck))
         return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
+
+    def getById(self, request):
+        user = request.user
+        if not request.data['deck_id']:
+            raise ValidationError("field deck_id does not exist")
+        deck_id = request.data['deck_id']
+        Deck.objects.get()
 
 
 

@@ -78,7 +78,7 @@ class CardDetailSerializer(serializers.Serializer):
     question_text = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
     question_image = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
     answer_text = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
-    answer_images = serializers.JSONField(allow_null=True)
+    answer_images = serializers.ListSerializer(child=serializers.CharField(), allow_null=True)
 
     class Meta:
         fields = ['id', 'question_text', 'question_image', 'answer_text', 'answer_images']
