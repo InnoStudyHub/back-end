@@ -28,7 +28,7 @@ class DeckCreateSerializer(serializers.Serializer):
         return value
 
     def create(self, validated_data):
-        #user = User.objects.get(id=validated_data['author_id'])
+        user = User.objects.get(id=validated_data['author_id'])
         #if user.deck_set.all().filter(deck_name=validated_data['deck_name'], folder_id=validated_data['folder_id']):
             #raise ValidationError(f"Deck with name {validated_data['deck_name']} already exist for this user")
 
