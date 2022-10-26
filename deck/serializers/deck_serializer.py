@@ -29,11 +29,11 @@ class DeckCreateSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         user = User.objects.get(id=validated_data['author_id'])
-        #if user.deck_set.all().filter(deck_name=validated_data['deck_name'], folder_id=validated_data['folder_id']):
-            #raise ValidationError(f"Deck with name {validated_data['deck_name']} already exist for this user")
+        if user.deck_set.all().filter(deck_name=validated_data['deck_name'], folder_id=validated_data['folder_id']):
+            raise ValidationError(f"Deck with name {validated_data['deck_name']} already exist for this user")
+        deck = Deck.objects.create(deck_name=validated_data['deck_name'], author_id=user.id,
+                                   folder_id=validated_data['folder_id'], semester=validated_data['semester'])
 
-        deck = Deck.objects.create(deck_name=validated_data['deck_name'], author_id=validated_data['author_id'],
-                                   folder_id=user.id, semester=validated_data['semester'])
         for card in validated_data['cards']:
             self.create_card(card=card, deck_id=deck.id, files=validated_data['files'])
 
