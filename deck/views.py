@@ -1,16 +1,18 @@
 from django import forms
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
 from rest_framework import status, viewsets, fields
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils import json
 
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
-    DeckListSerializer, DeckDetailSerializer
+    DeckListSerializer, DeckDetailSerializer, DeckPreviewSerializer
 from deck.serializers.folder_serializers import FolderCreateSerializer
 from deck.models import Deck
+from user.models import User
+
 
 def getDeckData(deck):
     cards = deck.card_set.all()
@@ -19,6 +21,16 @@ def getDeckData(deck):
     for card in cards:
         data['cards'].append(card.__dict__)
     serializer = DeckDetailSerializer(data=data)
+    if not serializer.is_valid(raise_exception=True):
+        raise ValidationError(serializer.error_messages)
+    return serializer.data
+
+def getDeckPreview(deck, user):
+    cards = deck.card_set.all()
+    data = deck.__dict__
+    data['cards'] = len(cards)
+    data['is_favourite'] = user.favourite_decks.contains(deck)
+    serializer = DeckPreviewSerializer(data=data)
     if not serializer.is_valid(raise_exception=True):
         raise ValidationError(serializer.error_messages)
     return serializer.data
@@ -71,13 +83,37 @@ class DeckViewSet(viewsets.ViewSet):
                 decks_data.append(getDeckData(deck))
         return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
 
-    def getById(self, request):
+    @extend_schema(
+        description='Get deck by id',
+        request=inline_serializer("GetDeckById", {"deck_id": fields.IntegerField()}, many=False),
+        responses={
+            200: DeckPreviewSerializer
+        }
+    )
+    def get_by_id(self, request):
         user = request.user
         if not request.data['deck_id']:
             raise ValidationError("field deck_id does not exist")
         deck_id = request.data['deck_id']
-        Deck.objects.get()
+        deck_data = getDeckPreview(Deck.objects.get(id=deck_id), user)
+        return Response(deck_data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        description='Get user deck by name',
+        request=inline_serializer("GetDeckByName", {"deck_name": fields.CharField()}, many=False),
+        responses={
+            200: DeckDetailSerializer
+        }
+    )
+    def get_by_name(self, request):
+        user = request.user
+        if not request.data['deck_name']:
+            raise ValidationError("field deck_name does not exist")
+        deck_name = request.data['deck_name']
+        if not user.deck_set.filter(deck_name=deck_name):
+            raise NotFound("User deck with this name does not found")
+        deck = user.deck_set.get(deck_name=deck_name)
+        return Response(getDeckData(deck), status=status.HTTP_200_OK)
 
 
 class FolderCreateView(CreateAPIView):
