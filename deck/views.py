@@ -41,7 +41,6 @@ class DeckViewSet(viewsets.ViewSet):
     def create(self, request):
         user = request.user
         data = json.loads(request.data['data'])
-        print(data)
         serializer = DeckCreateSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(author_id=user.id, files=request.data)
