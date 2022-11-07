@@ -14,10 +14,11 @@ from deck.models import Deck
 from user.models import User
 
 
-def getDeckData(deck):
+def getDeckData(deck, user):
     cards = deck.card_set.all()
     data = deck.__dict__
     data['cards'] = []
+    data['is_favourite'] = user.favourite_decks.contains(deck)
     for card in cards:
         data['cards'].append(card.__dict__)
     serializer = DeckDetailSerializer(data=data)
@@ -56,7 +57,7 @@ class DeckViewSet(viewsets.ViewSet):
         serializer = DeckCreateSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(author_id=user.id, files=request.data)
-            response_data = getDeckData(serializer.instance)
+            response_data = getDeckData(serializer.instance, user)
             return Response(response_data, status=status.HTTP_201_CREATED)
         else:
             raise ValidationError(serializer.error_messages)
@@ -70,6 +71,7 @@ class DeckViewSet(viewsets.ViewSet):
         }
     )
     def list(self, request):
+        user = request.user
         filter = {}
         if request.data.get('filter'):
             filter = request.data['filter']
@@ -80,14 +82,14 @@ class DeckViewSet(viewsets.ViewSet):
         decks_data = []
         for deck in decks:
             if query in deck.deck_name:
-                decks_data.append(getDeckData(deck))
+                decks_data.append(getDeckData(deck, user))
         return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Get deck by id',
         request=inline_serializer("GetDeckById", {"deck_id": fields.IntegerField()}, many=False),
         responses={
-            200: DeckPreviewSerializer
+            200: DeckDetailSerializer
         }
     )
     def get_by_id(self, request):
@@ -95,7 +97,7 @@ class DeckViewSet(viewsets.ViewSet):
         if not request.data['deck_id']:
             raise ValidationError("field deck_id does not exist")
         deck_id = request.data['deck_id']
-        deck_data = getDeckPreview(Deck.objects.get(id=deck_id), user)
+        deck_data = getDeckData(Deck.objects.get(id=deck_id), user)
         return Response(deck_data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -113,7 +115,7 @@ class DeckViewSet(viewsets.ViewSet):
         if not user.deck_set.filter(deck_name=deck_name):
             raise NotFound("User deck with this name does not found")
         deck = user.deck_set.get(deck_name=deck_name)
-        return Response(getDeckData(deck), status=status.HTTP_200_OK)
+        return Response(getDeckData(deck, user), status=status.HTTP_200_OK)
 
 
 class FolderCreateView(CreateAPIView):

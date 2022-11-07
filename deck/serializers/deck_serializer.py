@@ -54,9 +54,10 @@ class DeckDetailSerializer(serializers.Serializer):
     deck_name = serializers.CharField(max_length=1024)
     semester = serializers.CharField(max_length=255)
     cards = serializers.ListSerializer(child=CardDetailSerializer())
+    is_favourite = serializers.BooleanField()
 
     class Meta:
-        fields = ['deck_name', 'folder_id', 'author_id', 'semester', 'cards', 'id']
+        fields = ['deck_name', 'folder_id', 'author_id', 'semester', 'cards', 'id', 'is_favourite']
 
 
 class DeckPreviewSerializer(serializers.Serializer):
