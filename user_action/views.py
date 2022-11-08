@@ -81,5 +81,5 @@ class UserDeckView(viewsets.ViewSet):
         decks = user.deck_set.all()
         decks_data = []
         for deck in decks:
-            decks_data.append(getDeckData(deck))
+            decks_data.append(getDeckData(deck, user))
         return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
