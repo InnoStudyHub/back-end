@@ -1,4 +1,5 @@
-from django import forms
+import logging
+
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
 from rest_framework import status, viewsets, fields
 from rest_framework.exceptions import ValidationError, NotFound
@@ -10,11 +11,12 @@ from rest_framework.utils import json
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
     DeckListSerializer, DeckDetailSerializer, DeckPreviewSerializer
 from deck.serializers.folder_serializers import FolderCreateSerializer
-from deck.models import Deck
-from user.models import User
+from deck.models import Deck, Folder
 
+logger = logging.getLogger(__name__)
 
 def getDeckData(deck, user):
+    logger.info("Try to create DeckData")
     cards = deck.card_set.all()
     data = deck.__dict__
     data['cards'] = []
@@ -24,9 +26,11 @@ def getDeckData(deck, user):
     serializer = DeckDetailSerializer(data=data)
     if not serializer.is_valid(raise_exception=True):
         raise ValidationError(serializer.error_messages)
+    logger.info(f"DeckData successfully created: {serializer.data}")
     return serializer.data
 
 def getDeckPreview(deck, user):
+    logger.info("Try to create DeckDataPreview")
     cards = deck.card_set.all()
     data = deck.__dict__
     data['cards'] = len(cards)
@@ -34,6 +38,7 @@ def getDeckPreview(deck, user):
     serializer = DeckPreviewSerializer(data=data)
     if not serializer.is_valid(raise_exception=True):
         raise ValidationError(serializer.error_messages)
+    logger.info(f"DeckDataPreview successfully created: {serializer.data}")
     return serializer.data
 
 def getDecks(filter):
@@ -53,6 +58,7 @@ class DeckViewSet(viewsets.ViewSet):
     )
     def create(self, request):
         user = request.user
+        logger.info(f"Handle deck create request: {request.data}, from user {user.id}")
         data = json.loads(request.data['data'])
         serializer = DeckCreateSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
@@ -60,6 +66,7 @@ class DeckViewSet(viewsets.ViewSet):
             response_data = getDeckData(serializer.instance, user)
             return Response(response_data, status=status.HTTP_201_CREATED)
         else:
+            logger.warning("Something wrong with request body")
             raise ValidationError(serializer.error_messages)
 
     @extend_schema(
@@ -118,20 +125,33 @@ class DeckViewSet(viewsets.ViewSet):
         return Response(getDeckData(deck, user), status=status.HTTP_200_OK)
 
 
-class FolderCreateView(CreateAPIView):
+class FolderViewSet(viewsets.ViewSet):
     permission_classes = (IsAuthenticated,)
-    serializer_class = FolderCreateSerializer
 
     @extend_schema(
+        request=FolderCreateSerializer,
         responses={
             201: FolderCreateSerializer,
             (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist")
         }
     )
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+    def create(self, request, *args, **kwargs):
+        serializer = FolderCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        responses={
+            200: inline_serializer("ListFolder", {"folder_name": fields.CharField(), "folder_id": fields.IntegerField()}, many=True)
+        }
+    )
+    def list(self, request, *args, **kwargs):
+        folders = Folder.objects.all()
+        folders_data = []
+        for folder in folders:
+            folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.id})
+        return Response(folders_data, status=status.HTTP_200_OK)
+
