@@ -10,10 +10,11 @@ from rest_framework.utils import json
 
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
     DeckListSerializer, DeckDetailSerializer, DeckPreviewSerializer
-from deck.serializers.folder_serializers import FolderCreateSerializer
+from deck.serializers.folder_serializers import FolderCreateSerializer, FolderDetailSerializer
 from deck.models import Deck, Folder
 
 logger = logging.getLogger(__name__)
+
 
 def getDeckData(deck, user):
     logger.info("Try to create DeckData")
@@ -29,6 +30,7 @@ def getDeckData(deck, user):
     logger.info(f"DeckData successfully created: {serializer.data}")
     return serializer.data
 
+
 def getDeckPreview(deck, user):
     logger.info("Try to create DeckDataPreview")
     cards = deck.card_set.all()
@@ -41,8 +43,10 @@ def getDeckPreview(deck, user):
     logger.info(f"DeckDataPreview successfully created: {serializer.data}")
     return serializer.data
 
+
 def getDecks(filter):
     return Deck.objects.all().filter(**filter)
+
 
 class DeckViewSet(viewsets.ViewSet):
     permission_classes = (IsAuthenticated,)
@@ -73,11 +77,14 @@ class DeckViewSet(viewsets.ViewSet):
         description='Get all decks list by filter and query',
         request=DeckListSerializer,
         responses={
-            200: DeckDetailSerializer(many=True),
+            200: inline_serializer("SearchDecksAndFolders",
+                                   {"decks": DeckDetailSerializer(many=True),
+                                    "folders": FolderDetailSerializer(many=True)},
+                                   many=False),
             (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist"),
         }
     )
-    def list(self, request):
+    def search(self, request):
         user = request.user
         filter = {}
         if request.data.get('filter'):
@@ -85,12 +92,20 @@ class DeckViewSet(viewsets.ViewSet):
         query = ""
         if request.data.get('query'):
             query = request.data['query']
+
         decks = getDecks(filter)
         decks_data = []
         for deck in decks:
             if query in deck.deck_name:
                 decks_data.append(getDeckData(deck, user))
-        return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
+
+        folders = Folder.objects.all()
+        folders_data = []
+        for folder in folders:
+            if query in folder.folder_name:
+                folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.id})
+        return Response({"decks": DeckDetailSerializer(decks_data, many=True).data, "folders": folders_data},
+                        status=status.HTTP_200_OK)
 
     @extend_schema(
         description='Get deck by id',
@@ -145,7 +160,7 @@ class FolderViewSet(viewsets.ViewSet):
 
     @extend_schema(
         responses={
-            200: inline_serializer("ListFolder", {"folder_name": fields.CharField(), "folder_id": fields.IntegerField()}, many=True)
+            200: FolderDetailSerializer(many=True)
         }
     )
     def list(self, request, *args, **kwargs):
@@ -154,4 +169,3 @@ class FolderViewSet(viewsets.ViewSet):
         for folder in folders:
             folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.id})
         return Response(folders_data, status=status.HTTP_200_OK)
-
