@@ -6,7 +6,8 @@ from deck.models import Deck, Card
 
 class CardCreateSerializer(serializers.Serializer):
     question_text = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True, default="")
-    question_image_key = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True, default="")
+    question_image_key = serializers.CharField(max_length=1024, required=False, allow_blank=True,
+                                               allow_null=True, default="")
     answer_text = serializers.CharField(max_length=1024, required=False, allow_blank=True, allow_null=True, default="")
     answer_image_keys = serializers.ListSerializer(child=serializers.CharField(), required=False, allow_empty=True)
 
@@ -14,7 +15,7 @@ class CardCreateSerializer(serializers.Serializer):
         fields = ['question_text', 'question_image_key', 'answer_text', 'answer_image_keys']
 
     def isImage(self, image):
-        return (image.content_type is not None and image.content_type.split('/')[0] == 'image')
+        return image.content_type is not None and image.content_type.split('/')[0] == 'image'
 
     def uploadPublicFileToStorage(self, bucket_name, contents, destination_blob_name):
         storage_client = storage.Client()
@@ -29,7 +30,7 @@ class CardCreateSerializer(serializers.Serializer):
         files = validated_data['files']
         deck_id = validated_data['deck_id']
         file = files.get(image_key)
-        deck = Deck.objects.get(id=deck_id)
+        deck = Deck.objects.get(deck_id=deck_id)
         folder_name = deck.folder.folder_name
         deck_name = deck.deck_name
         store_path = f'deck/{folder_name}/{deck_id}_{deck_name}/{image_key}_{file.name}'
@@ -74,11 +75,11 @@ class CardCreateSerializer(serializers.Serializer):
 
 
 class CardDetailSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    card_id = serializers.IntegerField()
     question_text = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
     question_image = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
     answer_text = serializers.CharField(max_length=1024, allow_blank=True, allow_null=True)
     answer_images = serializers.ListSerializer(child=serializers.CharField(), allow_null=True)
 
     class Meta:
-        fields = ['id', 'question_text', 'question_image', 'answer_text', 'answer_images']
+        fields = ['card_id', 'question_text', 'question_image', 'answer_text', 'answer_images']

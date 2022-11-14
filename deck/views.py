@@ -1,5 +1,6 @@
 import logging
 
+from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
 from rest_framework import status, viewsets, fields
 from rest_framework.exceptions import ValidationError, NotFound
@@ -8,45 +9,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils import json
 
+from deck.helpers.deck_helpers import logger, getDeckData, getDecks
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
     DeckListSerializer, DeckDetailSerializer, DeckPreviewSerializer
 from deck.serializers.folder_serializers import FolderCreateSerializer, FolderDetailSerializer
 from deck.models import Deck, Folder
-
-logger = logging.getLogger(__name__)
-
-
-def getDeckData(deck, user):
-    logger.info("Try to create DeckData")
-    cards = deck.card_set.all()
-    data = deck.__dict__
-    data['cards'] = []
-    data['is_favourite'] = user.favourite_decks.contains(deck)
-    for card in cards:
-        data['cards'].append(card.__dict__)
-    serializer = DeckDetailSerializer(data=data)
-    if not serializer.is_valid(raise_exception=True):
-        raise ValidationError(serializer.error_messages)
-    logger.info(f"DeckData successfully created: {serializer.data}")
-    return serializer.data
-
-
-def getDeckPreview(deck, user):
-    logger.info("Try to create DeckDataPreview")
-    cards = deck.card_set.all()
-    data = deck.__dict__
-    data['cards'] = len(cards)
-    data['is_favourite'] = user.favourite_decks.contains(deck)
-    serializer = DeckPreviewSerializer(data=data)
-    if not serializer.is_valid(raise_exception=True):
-        raise ValidationError(serializer.error_messages)
-    logger.info(f"DeckDataPreview successfully created: {serializer.data}")
-    return serializer.data
-
-
-def getDecks(filter):
-    return Deck.objects.all().filter(**filter)
-
 
 class DeckViewSet(viewsets.ViewSet):
     permission_classes = (IsAuthenticated,)
@@ -73,39 +40,18 @@ class DeckViewSet(viewsets.ViewSet):
             logger.warning("Something wrong with request body")
             raise ValidationError(serializer.error_messages)
 
-    @extend_schema(
-        description='Get all decks list by filter and query',
-        request=DeckListSerializer,
-        responses={
-            200: inline_serializer("SearchDecksAndFolders",
-                                   {"decks": DeckDetailSerializer(many=True),
-                                    "folders": FolderDetailSerializer(many=True)},
-                                   many=False),
-            (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist"),
-        }
-    )
-    def search(self, request):
+    def createFromGoogleSheet(self, request):
         user = request.user
-        filter = {}
-        if request.data.get('filter'):
-            filter = request.data['filter']
-        query = ""
-        if request.data.get('query'):
-            query = request.data['query']
-
-        decks = getDecks(filter)
-        decks_data = []
-        for deck in decks:
-            if query in deck.deck_name:
-                decks_data.append(getDeckData(deck, user))
-
-        folders = Folder.objects.all()
-        folders_data = []
-        for folder in folders:
-            if query in folder.folder_name:
-                folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.id})
-        return Response({"decks": DeckDetailSerializer(decks_data, many=True).data, "folders": folders_data},
-                        status=status.HTTP_200_OK)
+        logger.info(f"Handle deck create request: {request.data}, from user {user.id}")
+        data = json.loads(request.data['data'])
+        serializer = DeckCreateSerializer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(author_id=user.id)
+            response_data = getDeckData(serializer.instance, user)
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        else:
+            logger.warning("Something wrong with request body")
+            raise ValidationError(serializer.error_messages)
 
     @extend_schema(
         description='Get deck by id',
@@ -116,10 +62,16 @@ class DeckViewSet(viewsets.ViewSet):
     )
     def get_by_id(self, request):
         user = request.user
-        if not request.data['deck_id']:
+
+        if not request.data.get('deck_id'):
             raise ValidationError("field deck_id does not exist")
+
         deck_id = request.data['deck_id']
-        deck_data = getDeckData(Deck.objects.get(id=deck_id), user)
+
+        if not Deck.objects.all().filter(deck_id=deck_id).exists():
+            raise NotFound(f"Deck with id-{deck_id} does not exist")
+
+        deck_data = getDeckData(Deck.objects.get(deck_id=deck_id), user)
         return Response(deck_data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -131,12 +83,21 @@ class DeckViewSet(viewsets.ViewSet):
     )
     def get_by_name(self, request):
         user = request.user
-        if not request.data['deck_name']:
+
+        if not request.data.get('deck_name'):
             raise ValidationError("field deck_name does not exist")
+        if not request.data.get('folder_id'):
+            raise ValidationError("field folder_id does not exist")
+
         deck_name = request.data['deck_name']
-        if not user.deck_set.filter(deck_name=deck_name):
-            raise NotFound("User deck with this name does not found")
-        deck = user.deck_set.get(deck_name=deck_name)
+        folder_id = request.data['folder_id']
+
+        if not Folder.objects.filter(folder_id=folder_id).exists():
+            raise NotFound(f"Folder with folder_id={folder_id} does not exist")
+        if not user.deck_set.filter(deck_name=deck_name, folder_id=folder_id).exists():
+            raise NotFound(f"User deck with name={deck_name} and folder_id={folder_id} does not exist")
+
+        deck = user.deck_set.get(deck_name=deck_name, folder_id=folder_id)
         return Response(getDeckData(deck, user), status=status.HTTP_200_OK)
 
 

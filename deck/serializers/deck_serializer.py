@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound, APIException
 
 from deck.serializers.card_serializers import CardCreateSerializer, CardDetailSerializer
 from deck.models import Deck, Folder
@@ -10,7 +10,7 @@ class DeckCreateSerializer(serializers.Serializer):
     folder_id = serializers.IntegerField()
     deck_name = serializers.CharField(max_length=1024)
     semester = serializers.CharField(max_length=255)
-    cards = serializers.ListSerializer(child=CardCreateSerializer(), allow_empty=True)
+    cards = serializers.ListSerializer(child=CardCreateSerializer(), allow_empty=True, required=False)
 
     class Meta:
         fields = ['deck_name', 'folder_id', 'semester', 'cards']
@@ -23,19 +23,28 @@ class DeckCreateSerializer(serializers.Serializer):
             raise ValidationError("Cards not valid")
 
     def validate_folder_id(self, value):
-        if not Folder.objects.filter(id=value):
-            raise PermissionDenied(f"Folder does not exist")
+        if not Folder.objects.filter(folder_id=value):
+            raise NotFound(f"Folder does not exist")
         return value
 
     def create(self, validated_data):
         user = User.objects.get(id=validated_data['author_id'])
-        #if user.deck_set.all().filter(deck_name=validated_data['deck_name'], folder_id=validated_data['folder_id']):
-        #    raise ValidationError(f"Deck with name {validated_data['deck_name']} already exist for this user")
+
+        if user.deck_set.all().filter(deck_name=validated_data['deck_name'], folder_id=validated_data['folder_id']):
+            raise ValidationError(f"Deck with name {validated_data['deck_name']} already exist for this user")
+
         deck = Deck.objects.create(deck_name=validated_data['deck_name'], author_id=user.id,
                                    folder_id=validated_data['folder_id'], semester=validated_data['semester'])
 
-        for card in validated_data['cards']:
-            self.create_card(card=card, deck_id=deck.id, files=validated_data['files'])
+        if not validated_data.get('cards'):
+            validated_data['cards'] = []
+
+        try:
+            for card in validated_data['cards']:
+                self.create_card(card=card, deck_id=deck.deck_id, files=validated_data['files'])
+        except Exception as e:
+            deck.delete()
+            raise e
 
         return deck
 
@@ -48,7 +57,7 @@ class DeckRequestSerializer(serializers.Serializer):
 
 
 class DeckDetailSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    deck_id = serializers.IntegerField()
     folder_id = serializers.IntegerField()
     author_id = serializers.IntegerField()
     deck_name = serializers.CharField(max_length=1024)
@@ -57,11 +66,11 @@ class DeckDetailSerializer(serializers.Serializer):
     is_favourite = serializers.BooleanField()
 
     class Meta:
-        fields = ['deck_name', 'folder_id', 'author_id', 'semester', 'cards', 'id', 'is_favourite']
+        fields = ['deck_name', 'folder_id', 'author_id', 'semester', 'cards', 'deck_id', 'is_favourite']
 
 
 class DeckPreviewSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    deck_id = serializers.IntegerField()
     folder_id = serializers.IntegerField()
     author_id = serializers.IntegerField()
     deck_name = serializers.CharField(max_length=1024)
@@ -70,7 +79,7 @@ class DeckPreviewSerializer(serializers.Serializer):
     is_favourite = serializers.BooleanField()
 
     class Meta:
-        fields = ['deck_name', 'folder_id', 'author_id', 'semester', 'cards', 'id', 'is_favourite']
+        fields = ['deck_name', 'folder_id', 'author_id', 'semester', 'cards', 'deck_id', 'is_favourite']
 
 
 class FilterRequestSerializer(serializers.Serializer):
