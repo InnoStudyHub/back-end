@@ -128,5 +128,5 @@ class FolderViewSet(viewsets.ViewSet):
         folders = Folder.objects.all()
         folders_data = []
         for folder in folders:
-            folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.id})
+            folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.folder_id})
         return Response(folders_data, status=status.HTTP_200_OK)
