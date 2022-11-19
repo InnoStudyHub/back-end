@@ -1,19 +1,16 @@
-import logging
-
-from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
 from rest_framework import status, viewsets, fields
 from rest_framework.exceptions import ValidationError, NotFound
-from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils import json
 
-from deck.helpers.deck_helpers import logger, getDeckData, getDecks
+from deck.helpers.deck_helpers import logger, getDeckData
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
-    DeckListSerializer, DeckDetailSerializer, DeckPreviewSerializer
+    DeckDetailSerializer, DeckFromSheetSerializer
 from deck.serializers.folder_serializers import FolderCreateSerializer, FolderDetailSerializer
 from deck.models import Deck, Folder
+
 
 class DeckViewSet(viewsets.ViewSet):
     permission_classes = (IsAuthenticated,)
@@ -40,11 +37,19 @@ class DeckViewSet(viewsets.ViewSet):
             logger.warning("Something wrong with request body")
             raise ValidationError(serializer.error_messages)
 
+    @extend_schema(
+        description='Create deck from sheet request',
+        request=DeckFromSheetSerializer,
+        responses={
+            201: DeckDetailSerializer,
+            (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist"),
+            (403, 'text/plain'): OpenApiResponse(description="Deck with this name exist")
+        }
+    )
     def createFromGoogleSheet(self, request):
         user = request.user
         logger.info(f"Handle deck create request: {request.data}, from user {user.id}")
-        data = json.loads(request.data['data'])
-        serializer = DeckCreateSerializer(data=data)
+        serializer = DeckFromSheetSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(author_id=user.id)
             response_data = getDeckData(serializer.instance, user)

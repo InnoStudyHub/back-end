@@ -1,10 +1,4 @@
 import logging
-import urllib.request
-from io import BytesIO
-
-from openpyxl import load_workbook
-from openpyxl_image_loader import SheetImageLoader
-
 from rest_framework.exceptions import ValidationError
 
 from deck.models import Deck
@@ -42,12 +36,3 @@ def getDeckPreview(deck, user):
 
 def getDecks(filter):
     return Deck.objects.all().filter(**filter)
-
-def parseGoogleSheet(url):
-    file = urllib.request.urlopen(url).read()
-    doc = load_workbook(filename=BytesIO(file))
-    sheet = doc[doc.sheetnames[0]]
-    image_loader = SheetImageLoader(sheet)
-    imageCells = list(image_loader.images.keys())
-
-    image = image_loader.get('B13')
