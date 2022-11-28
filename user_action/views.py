@@ -1,15 +1,16 @@
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
 from rest_framework import fields, status, viewsets
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from deck.helpers.deck_helpers import getDecks
+from deck.helpers.deck_helpers import getDecks, logger
 from deck.models import Deck, Folder
 from deck.serializers.deck_serializer import DeckDetailSerializer, DeckListSerializer
 from deck.serializers.folder_serializers import FolderDetailSerializer
 from deck.views import getDeckData
+from user_action.models import DeckOpened
 
 
 class FavouritesView(viewsets.ViewSet):
@@ -25,6 +26,7 @@ class FavouritesView(viewsets.ViewSet):
     )
     def add_favourite(self, request, *args, **kwargs):
         user = request.user
+        logger.info(f"Handle remove deck from favourite request: {request.data}, from user {user.id}")
         if not request.data.get('deck_id'):
             raise ValidationError(detail={'deck_id': 'field is not exist'}, code=400)
         deck_id = request.data['deck_id']
@@ -33,6 +35,7 @@ class FavouritesView(viewsets.ViewSet):
             raise PermissionDenied("This deck is already favourite by user")
 
         user.favourite_decks.add(Deck.objects.get(deck_id=deck_id))
+        logger.info(f"Deck add to favorites, deck_id: {deck_id}")
         return Response("Deck successfully add to favourites", status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -45,6 +48,7 @@ class FavouritesView(viewsets.ViewSet):
     )
     def remove_favourite(self, request, *args, **kwargs):
         user = request.user
+        logger.info(f"Handle remove deck from favourite request: {request.data}, from user {user.id}")
         if not request.data.get('deck_id'):
             raise ValidationError(detail={'deck_id': 'field is not exist'}, code=400)
         deck_id = request.data['deck_id']
@@ -53,6 +57,7 @@ class FavouritesView(viewsets.ViewSet):
             raise PermissionDenied("This deck is not favourite by user")
 
         user.favourite_decks.remove(Deck.objects.get(deck_id=deck_id))
+        logger.info(f"Deck removed from favorites, deck_id: {deck_id}")
         return Response("Deck successfully remove from favourites", status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -63,10 +68,13 @@ class FavouritesView(viewsets.ViewSet):
     )
     def get_favourites(self, request, *args, **kwargs):
         user = request.user
+        logger.info(f"Handle get user favourites request: {request.data}, from user {user.id}")
         decks = user.favourite_decks.all()
         decks_data = []
         for deck in decks:
             decks_data.append(getDeckData(deck, user))
+        logger.info(f"Decks data: {decks_data}")
+
         return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
 
 
@@ -81,14 +89,36 @@ class UserDeckView(viewsets.ViewSet):
     )
     def get_user_decks(self, request, *args, **kwargs):
         user = request.user
+        logger.info(f"Handle user deck request: {request.data}, from user {user.id}")
         decks = user.deck_set.all()
         decks_data = []
         for deck in decks:
             decks_data.append(getDeckData(deck, user))
+        logger.info(f"Decks data: {decks_data}")
+
+        return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=None,
+        responses={
+            (200, 'application/json'): DeckDetailSerializer(many=True)
+        }
+    )
+    def get_recent_decks(self, request, *args, **kwargs):
+        user = request.user
+        logger.info(f"Handle user recent deck request: {request.data}, from user {user.id}")
+        decks = user.deckopened_set.order_by('view_at').reverse()[:15]
+        decks_data = []
+        for deck_opened in decks:
+            deck = Deck.objects.get(deck_id=deck_opened.deck_id)
+            decks_data.append(getDeckData(deck, user))
+        logger.info(f"Recent deck datas: {decks_data}")
         return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
 
 
 class SearchView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     @extend_schema(
         description='Get all decks list by filter and query',
         request=DeckListSerializer,
@@ -102,23 +132,58 @@ class SearchView(APIView):
     )
     def post(self, request):
         user = request.user
+        logger.info(f"Handle search request: {request.data}, from user {user.id}")
         filter = {}
         if request.data.get('filter'):
             filter = request.data['filter']
         query = ""
         if request.data.get('query'):
             query = request.data['query']
+        logger.info(f"Filter: {filter}, query {query}")
 
         decks = getDecks(filter)
         decks_data = []
         for deck in decks:
             if query in deck.deck_name:
                 decks_data.append(getDeckData(deck, user))
+        logger.info(f"Find decks data: {decks_data}")
 
         folders = Folder.objects.all()
         folders_data = []
         for folder in folders:
             if query in folder.folder_name:
                 folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.folder_id})
+        logger.info(f"Find folders data: {folders_data}")
+
         return Response({"decks": DeckDetailSerializer(decks_data, many=True).data, "folders": folders_data},
                         status=status.HTTP_200_OK)
+
+
+class UserLogsView(viewsets.ViewSet):
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        description='Handle deck viewed by user',
+        request=inline_serializer("UserLogDeck",
+                                  {"deck_id": fields.IntegerField()},
+                                  many=False),
+        responses={
+            200: None,
+            (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist"),
+            (404, 'text/plain'): OpenApiResponse(description="Deck is not exist"),
+        }
+    )
+    def deck_opened(self, request):
+        user = request.user
+        logger.info(f"Handle deck opened request: {request.data}, from user {user.id}")
+        if not request.data.get('deck_id'):
+            raise ValidationError('Field deck_id does not exist')
+        deck_id = request.data['deck_id']
+
+        if not Deck.objects.filter(deck_id=deck_id):
+            raise NotFound(f'Deck with deck_id={deck_id} not found')
+
+        deck_opened = DeckOpened.objects.get_or_create(deck_id=deck_id, user_id=user.id)
+        deck_opened[0].save()
+        logger.info(f"Saved opened deck log, deck_view_id - {deck_opened[0].deck_view_id}")
+        return Response(status=status.HTTP_200_OK)

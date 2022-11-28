@@ -48,11 +48,12 @@ class DeckViewSet(viewsets.ViewSet):
     )
     def createFromGoogleSheet(self, request):
         user = request.user
-        logger.info(f"Handle deck create request: {request.data}, from user {user.id}")
+        logger.info(f"Handle deck create from google sheet request: {request.data}, from user {user.id}")
         serializer = DeckFromSheetSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(author_id=user.id)
             response_data = getDeckData(serializer.instance, user)
+            logger.info(f"Deck successfully created: {response_data}")
             return Response(response_data, status=status.HTTP_201_CREATED)
         else:
             logger.warning("Something wrong with request body")
@@ -67,7 +68,7 @@ class DeckViewSet(viewsets.ViewSet):
     )
     def get_by_id(self, request):
         user = request.user
-
+        logger.info(f"Handle get deck by id: {request.data}, from user {user.id}")
         if not request.data.get('deck_id'):
             raise ValidationError("field deck_id does not exist")
 
@@ -77,6 +78,7 @@ class DeckViewSet(viewsets.ViewSet):
             raise NotFound(f"Deck with id-{deck_id} does not exist")
 
         deck_data = getDeckData(Deck.objects.get(deck_id=deck_id), user)
+        logger.info(f"Deck data: {deck_data}")
         return Response(deck_data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -88,7 +90,7 @@ class DeckViewSet(viewsets.ViewSet):
     )
     def get_by_name(self, request):
         user = request.user
-
+        logger.info(f"Handle get deck by name: {request.data}, from user {user.id}")
         if not request.data.get('deck_name'):
             raise ValidationError("field deck_name does not exist")
         if not request.data.get('folder_id'):
@@ -103,7 +105,9 @@ class DeckViewSet(viewsets.ViewSet):
             raise NotFound(f"User deck with name={deck_name} and folder_id={folder_id} does not exist")
 
         deck = user.deck_set.get(deck_name=deck_name, folder_id=folder_id)
-        return Response(getDeckData(deck, user), status=status.HTTP_200_OK)
+        deck_data = getDeckData(deck, user)
+        logger.info(f"Deck data: {deck_data}")
+        return Response(deck_data, status=status.HTTP_200_OK)
 
 
 class FolderViewSet(viewsets.ViewSet):
@@ -117,9 +121,11 @@ class FolderViewSet(viewsets.ViewSet):
         }
     )
     def create(self, request, *args, **kwargs):
+        logger.info(f"Handle create folder request: {request.data}")
         serializer = FolderCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            folder = serializer.save()
+            logger.info(f"Folder created: {folder}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -130,8 +136,10 @@ class FolderViewSet(viewsets.ViewSet):
         }
     )
     def list(self, request, *args, **kwargs):
+        logger.info(f"Handle list all folders request: {request.data}")
         folders = Folder.objects.all()
         folders_data = []
         for folder in folders:
             folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.folder_id})
+        logger.info(f"Folders data: {folders_data}")
         return Response(folders_data, status=status.HTTP_200_OK)

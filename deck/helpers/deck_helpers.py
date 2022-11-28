@@ -1,10 +1,9 @@
-import logging
 from rest_framework.exceptions import ValidationError
 
 from deck.models import Deck
 from deck.serializers.deck_serializer import DeckDetailSerializer, DeckPreviewSerializer
+from studyhub.settings import logger
 
-logger = logging.getLogger(__name__)
 
 def getDeckData(deck, user):
     logger.info("Try to create DeckData")

@@ -33,3 +33,13 @@ class FolderTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         folders = response.data
         self.assertEqual(len(folders), len(self.folder_data))
+
+
+class DeckTests(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        pass
+
+    def setUp(self):
+        self.folder_1 = Folder.objects.create(folder_name='Folder 1')
+        self.folder_2 = Folder.objects.create(folder_name='Folder 2')
