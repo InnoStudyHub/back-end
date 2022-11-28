@@ -11,8 +11,10 @@ class FolderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return Folder.objects.create(**validated_data)
 
+
 class FolderDetailSerializer(serializers.Serializer):
     folder_name = serializers.CharField(max_length=255)
     folder_id = serializers.IntegerField()
+
     class Meta:
         fields = ['folder_name', 'folder_id']
