@@ -51,14 +51,3 @@ class User(AbstractBaseUser):
         db_table = 'user'
         verbose_name = 'User'
         verbose_name_plural = 'Users'
-
-
-class UserFolderPermission(models.Model):
-    from deck.models import Folder
-    user_permission_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
-    access_type = models.IntegerField()
-
-    class Meta:
-        db_table = 'user_folder_permission'

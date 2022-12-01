@@ -38,3 +38,12 @@ class Card(models.Model):
 
     class Meta:
         db_table = 'card'
+
+class UserFolderPermission(models.Model):
+    user_permission_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
+    access_type = models.IntegerField()
+
+    class Meta:
+        db_table = 'user_folder_permission'
