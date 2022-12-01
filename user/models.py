@@ -1,12 +1,7 @@
-from datetime import datetime, timedelta
-
-import jwt
 from django.db import models
 from django.contrib.auth.models import (
     BaseUserManager, AbstractBaseUser
 )
-
-from studyhub import settings
 
 
 class UserManager(BaseUserManager):
@@ -42,6 +37,8 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     favourite_decks = models.ManyToManyField('deck.Deck')
+    iu_refresh_token = models.CharField(max_length=4096, default='', null=True)
+    iu_access_token = models.CharField(max_length=4096, default='', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -54,3 +51,14 @@ class User(AbstractBaseUser):
         db_table = 'user'
         verbose_name = 'User'
         verbose_name_plural = 'Users'
+
+
+class UserFolderPermission(models.Model):
+    from deck.models import Folder
+    user_permission_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
+    access_type = models.IntegerField()
+
+    class Meta:
+        db_table = 'user_folder_permission'

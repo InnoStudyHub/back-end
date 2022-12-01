@@ -1,6 +1,11 @@
+import json
+import time
+
+import requests
 from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema, OpenApiResponse
-from rest_framework import status
+from rest_framework import status, viewsets
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -9,7 +14,9 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from studyhub import settings
 from studyhub.settings import logger
+from .helpers.user_helpers import register_iu_user
 from .serializers import MyTokenObtainPairSerializer, UserSerializer
 from .serializers import RegistrationSerializer
 
@@ -72,3 +79,34 @@ class UserAPIView(GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         return HttpResponse(self.request.user, content_type="application/json")
+
+
+class UserIULoginView(viewsets.ViewSet):
+    def auth_iu_with_code(self, request, *args, **kwargs):
+
+        code = str(request.data.get('code', ''))
+        redirect_url = str(request.data.get('redirect_uri', ''))
+        if not code:
+            raise ValidationError("Parameter code does not exist")
+
+        if not redirect_url:
+            raise ValidationError("Parameter code does not exist")
+
+        request_data = {
+            'client_id': settings.AUTH_ADFS['CLIENT_ID'],
+            'client_secret': settings.AUTH_ADFS['CLIENT_SECRET'],
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': redirect_url
+        }
+        request_url = f'https://{settings.AUTH_ADFS["URL"]}adfs/oauth2/token'
+        headers = {'Content-type': "application/x-www-form-urlencoded"}
+        response = requests.post(url=request_url, headers=headers, data=request_data, verify=False)
+
+        if response.status_code != 200:
+            logger.info(f'Response from adfs: {response.content}')
+            return Response("Something goes wrong", status=400)
+
+        data = json.loads(response.content)
+        tokens = register_iu_user(access_token=data['access_token'], refresh_token=data['refresh_token'])
+        return Response(tokens, status=200)

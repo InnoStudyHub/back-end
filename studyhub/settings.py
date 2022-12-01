@@ -32,7 +32,7 @@ LOGGING = {
 
 # Secrets
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '.data/google_cloud_key.json')
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY','django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
 
 # Debug mode
 DEBUG = os.environ.get('DEBUG', "True") == "True"
@@ -54,6 +54,13 @@ INSTALLED_APPS = [
     'deck',
     'user_action'
 ]
+
+# ADFS
+AUTH_ADFS = {
+    'URL': 'sso.university.innopolis.ru/',
+    'CLIENT_ID': '02bdd68b-3508-40fa-aa30-c2b9e6f2f4c5',
+    'CLIENT_SECRET': 'mK0gJz4Wq5gcQDOv2C59jjsJzNWCfqb91cgp5ltm'
+}
 
 # AUTH setup
 AUTH_USER_MODEL = 'user.User'

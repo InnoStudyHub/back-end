@@ -32,6 +32,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
         return token
 
+
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     fullname = serializers.CharField()
