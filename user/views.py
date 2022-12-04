@@ -3,8 +3,8 @@ import time
 
 import requests
 from django.http import HttpResponse
-from drf_spectacular.utils import extend_schema, OpenApiResponse
-from rest_framework import status, viewsets
+from drf_spectacular.utils import extend_schema, OpenApiResponse, inline_serializer
+from rest_framework import status, viewsets, fields
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -17,6 +17,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from studyhub import settings
 from studyhub.settings import logger
 from .helpers.user_helpers import register_iu_user
+from .models import User
 from .serializers import MyTokenObtainPairSerializer, UserSerializer
 from .serializers import RegistrationSerializer
 
@@ -82,8 +83,15 @@ class UserAPIView(GenericAPIView):
 
 
 class UserIULoginView(viewsets.ViewSet):
+    @extend_schema(
+        request=inline_serializer(name='LoginWithIU',
+                                  fields={"code": fields.CharField(),
+                                          "redirect_uri": fields.CharField()}),
+        responses={
+            (200, 'text/plain'): OpenApiResponse(description="Successfully login")
+        },
+    )
     def auth_iu_with_code(self, request, *args, **kwargs):
-
         code = str(request.data.get('code', ''))
         redirect_url = str(request.data.get('redirect_uri', ''))
         if not code:

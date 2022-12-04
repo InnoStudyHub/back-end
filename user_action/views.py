@@ -1,4 +1,4 @@
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse, OpenApiParameter
 from rest_framework import fields, status, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
@@ -10,6 +10,7 @@ from deck.models import Deck, Folder
 from deck.serializers.deck_serializer import DeckDetailSerializer, DeckListSerializer
 from deck.serializers.folder_serializers import FolderDetailSerializer
 from deck.views import getDeckData
+from user.models import User
 from user_action.models import DeckOpened
 
 
@@ -157,6 +158,33 @@ class SearchView(APIView):
 
         return Response({"decks": DeckDetailSerializer(decks_data, many=True).data, "folders": folders_data},
                         status=status.HTTP_200_OK)
+
+
+class UserInfoAPIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("userId", int)
+        ],
+        request=None,
+        responses={
+            200: inline_serializer(name='GetUserInfoById',
+                                   fields={"email": fields.CharField(),
+                                           "fullname": fields.CharField()})
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        user_id = request.GET.get('userId', None)
+        if not user_id:
+            raise ValidationError('userId param does not exist')
+        if User.objects.filter(id=user_id).exists():
+            user = User.objects.get(id=user_id)
+            user_response = {
+                "email": user.email,
+                "fullname": user.fullname
+            }
+            return Response(user_response, status=200)
+
+        return Response(f"User does not exist", status=404)
 
 
 class UserLogsView(viewsets.ViewSet):

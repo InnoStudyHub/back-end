@@ -1,4 +1,4 @@
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse, OpenApiParameter
 from rest_framework import status, viewsets, fields
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
@@ -130,6 +130,34 @@ class FolderViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("folderId", int)
+        ],
+        request=None,
+        responses={
+            200: DeckDetailSerializer(many=True)
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        logger.info(f"Handle get folder data: {request.data}")
+        folder_id = request.GET.get('folderId', None)
+
+        if not folder_id:
+            raise ValidationError("folderId param does not exist")
+
+        if not Folder.objects.filter(folder_id=folder_id).exists():
+            raise NotFound("Folder not found")
+
+        decks = Folder.objects.get(folder_id=folder_id).deck_set.all()
+        decks_data = []
+        for deck_opened in decks:
+            deck = Deck.objects.get(deck_id=deck_opened.deck_id)
+            decks_data.append(getDeckData(deck, user))
+        logger.info(f"Recent deck datas: {decks_data}")
+        return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         responses={
