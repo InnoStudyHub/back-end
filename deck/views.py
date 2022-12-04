@@ -4,12 +4,13 @@ from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils import json
+from rest_framework.views import APIView
 
 from deck.helpers.deck_helpers import logger, getDeckData
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
     DeckDetailSerializer, DeckFromSheetSerializer
 from deck.serializers.folder_serializers import FolderCreateSerializer, FolderDetailSerializer
-from deck.models import Deck, Folder
+from deck.models import Deck, Folder, Courses
 
 
 class DeckViewSet(viewsets.ViewSet):
@@ -143,3 +144,32 @@ class FolderViewSet(viewsets.ViewSet):
             folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.folder_id})
         logger.info(f"Folders data: {folders_data}")
         return Response(folders_data, status=status.HTTP_200_OK)
+
+
+class CoursesAPIView(APIView):
+    @extend_schema(
+        request=inline_serializer("AddCourses",
+                                  {"courses": inline_serializer(name="CourseData",
+                                                                fields={"course_name": fields.CharField(),
+                                                                        "course_year": fields.ChoiceField(
+                                                                            choices=(1, 2, 3, 4))
+                                                                        },
+                                                                many=True)}),
+        responses={
+            (201, 'text/plain'): OpenApiResponse(description="Courses successfully added"),
+            (400, 'text/plain'): OpenApiResponse(description="Some fields do not exist")
+        },
+    )
+    def post(self, request):
+        courses_data = request.data.get('courses', [])
+        for course_data in courses_data:
+            course_name = course_data.get('course_name', '')
+            course_year = course_data.get('course_year', None)
+
+            if not course_name or not course_year:
+                raise ValidationError('course_name or course_year field does not exist')
+
+            Courses.objects.get_or_create(course_name=course_name, year=course_year)
+
+        return Response(f"{len(courses_data)} courses successfully added", status=201)
+

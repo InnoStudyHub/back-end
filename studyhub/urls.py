@@ -18,7 +18,8 @@ urlpatterns = [
     path('auth/', include('user.urls')),
     path('deck/', include('deck.urls.deck_urls')),
     path('folder/', include('deck.urls.folder_urls')),
-    path('user/', include('user_action.urls'))
+    path('courses/', include('deck.urls.course_urls')),
+    path('user/', include('user_action.urls')),
 ]
 
 
