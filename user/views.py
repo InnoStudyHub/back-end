@@ -109,4 +109,5 @@ class UserIULoginView(viewsets.ViewSet):
 
         data = json.loads(response.content)
         tokens = register_iu_user(access_token=data['access_token'], refresh_token=data['refresh_token'])
+
         return Response(tokens, status=200)

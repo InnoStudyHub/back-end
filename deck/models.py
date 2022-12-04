@@ -39,6 +39,7 @@ class Card(models.Model):
     class Meta:
         db_table = 'card'
 
+
 class UserFolderPermission(models.Model):
     user_permission_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -47,3 +48,11 @@ class UserFolderPermission(models.Model):
 
     class Meta:
         db_table = 'user_folder_permission'
+
+
+class Courses(models.Model):
+    course_name = models.CharField(max_length=1024)
+    year = models.IntegerField()
+
+    class Meta:
+        db_table = 'course'

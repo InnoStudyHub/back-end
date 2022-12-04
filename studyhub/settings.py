@@ -62,6 +62,12 @@ AUTH_ADFS = {
     'CLIENT_SECRET': 'mK0gJz4Wq5gcQDOv2C59jjsJzNWCfqb91cgp5ltm'
 }
 
+# Moodle
+MOODLE_API = {
+    'URL': 'dev.moodle.innopolis.university/webservice/rest/server.php',
+    'TOKEN': 'f1cc7bed428ef04b92943587e41a03af'
+}
+
 # AUTH setup
 AUTH_USER_MODEL = 'user.User'
 
