@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from deck.helpers.deck_helpers import getDecks, logger
-from deck.models import Deck, Folder
+from deck.models import Deck, Folder, UserFolderPermission
 from deck.serializers.deck_serializer import DeckDetailSerializer, DeckListSerializer
 from deck.serializers.folder_serializers import FolderDetailSerializer
 from deck.views import getDeckData
@@ -115,6 +115,30 @@ class UserDeckView(viewsets.ViewSet):
             decks_data.append(getDeckData(deck, user))
         logger.info(f"Recent deck datas: {decks_data}")
         return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=None,
+        responses={
+            (200, 'application/json'): FolderDetailSerializer(many=True)
+        }
+    )
+    def get_for_you_decks(self, request, *args, **kwargs):
+        user = request.user
+        logger.info(f"Handle user for you deck request: {request.data}, from user {user.id}")
+        user_folder_permission = UserFolderPermission.objects.filter(user=user)
+        folders = []
+
+        if user_folder_permission.exists():
+            for permission in user_folder_permission:
+                folders.append(permission.folder)
+        else:
+            folders = Folder.objects.all()
+
+        folders_data = []
+        for folder in folders:
+            folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.folder_id})
+        logger.info(f"Folders data: {folders_data}")
+        return Response(folders_data, status=status.HTTP_200_OK)
 
 
 class SearchView(APIView):

@@ -197,7 +197,8 @@ class CoursesAPIView(APIView):
             if not course_name or not course_year:
                 raise ValidationError('course_name or course_year field does not exist')
 
-            Courses.objects.get_or_create(course_name=course_name, year=course_year)
+            course = Courses.objects.get_or_create(course_name=course_name, year=course_year)
+            Folder.objects.get_or_create(folder_name=course[0].course_name)
 
         return Response(f"{len(courses_data)} courses successfully added", status=201)
 

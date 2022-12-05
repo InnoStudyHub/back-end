@@ -50,10 +50,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
+    'rest_framework_api_key',
     'user',
     'deck',
     'user_action'
 ]
+
+# API Setup
+API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 
 # ADFS
 AUTH_ADFS = {
@@ -71,6 +75,7 @@ MOODLE_API = {
 # AUTH setup
 AUTH_USER_MODEL = 'user.User'
 
+# JWT
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
