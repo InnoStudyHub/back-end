@@ -40,6 +40,20 @@ DEBUG = os.environ.get('DEBUG', "True") == "True"
 # Allowed hosts for request
 ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOSTS', '*')]
 
+# CORS
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = (
+    'content-disposition',
+    'accept-encoding',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization',
+    'cache-control',
+    'x-api-key'
+)
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -51,6 +65,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework_api_key',
+    'corsheaders',
     'user',
     'deck',
     'user_action'
@@ -103,6 +118,7 @@ SPECTACULAR_SETTINGS = {
 # Server settings
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
