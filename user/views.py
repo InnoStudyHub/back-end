@@ -10,9 +10,10 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_api_key.permissions import HasAPIKey
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from studyhub import settings
 from studyhub.settings import logger
@@ -23,7 +24,7 @@ from .serializers import RegistrationSerializer
 
 
 class RegistrationAPIView(GenericAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny, HasAPIKey]
     serializer_class = RegistrationSerializer
 
     @extend_schema(
@@ -43,7 +44,7 @@ class RegistrationAPIView(GenericAPIView):
 
 
 class MyObtainTokenPairView(TokenObtainPairView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, HasAPIKey)
     serializer_class = MyTokenObtainPairSerializer
 
     @extend_schema(
@@ -55,8 +56,12 @@ class MyObtainTokenPairView(TokenObtainPairView):
         return super().post(request, args, kwargs)
 
 
+class MyTokenRefreshView(TokenRefreshView):
+    permission_classes = (HasAPIKey,)
+
+
 class LogoutAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         request=None,
@@ -75,7 +80,7 @@ class LogoutAPIView(APIView):
 
 
 class UserAPIView(GenericAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
     serializer_class = UserSerializer
 
     def get(self, request, *args, **kwargs):

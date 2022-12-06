@@ -38,7 +38,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-mw_n2-#0p-4p-a
 DEBUG = os.environ.get('DEBUG', "True") == "True"
 
 # Allowed hosts for request
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOSTS', '*')]
 
 # Application definition
 INSTALLED_APPS = [
@@ -61,15 +61,15 @@ API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 
 # ADFS
 AUTH_ADFS = {
-    'URL': 'sso.university.innopolis.ru/',
-    'CLIENT_ID': '02bdd68b-3508-40fa-aa30-c2b9e6f2f4c5',
-    'CLIENT_SECRET': 'mK0gJz4Wq5gcQDOv2C59jjsJzNWCfqb91cgp5ltm'
+    'URL': os.environ.get('ADFS_URL', 'sso.university.innopolis.ru/'),
+    'CLIENT_ID': os.environ.get('ADFS_CLIENT_ID', '02bdd68b-3508-40fa-aa30-c2b9e6f2f4c5'),
+    'CLIENT_SECRET': os.environ.get('ADFS_CLIENT_SECRET', 'mK0gJz4Wq5gcQDOv2C59jjsJzNWCfqb91cgp5ltm')
 }
 
 # Moodle
 MOODLE_API = {
-    'URL': 'dev.moodle.innopolis.university/webservice/rest/server.php',
-    'TOKEN': 'f1cc7bed428ef04b92943587e41a03af'
+    'URL': os.environ.get('MOODLE_URL', 'dev.moodle.innopolis.university/webservice/rest/server.php'),
+    'TOKEN': os.environ.get('MOODLE_TOKEN', 'f1cc7bed428ef04b92943587e41a03af')
 }
 
 # AUTH setup
@@ -80,6 +80,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework_api_key.permissions.HasAPIKey',
+    ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 

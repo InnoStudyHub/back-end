@@ -4,6 +4,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError, NotFoun
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_api_key.permissions import HasAPIKey
 
 from deck.helpers.deck_helpers import getDecks, logger
 from deck.models import Deck, Folder, UserFolderPermission
@@ -15,7 +16,7 @@ from user_action.models import DeckOpened
 
 
 class FavouritesView(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         request=inline_serializer("FavouritesAdd", {"deck_id": fields.IntegerField()}, many=False),
@@ -80,7 +81,7 @@ class FavouritesView(viewsets.ViewSet):
 
 
 class UserDeckView(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         request=None,
@@ -142,7 +143,7 @@ class UserDeckView(viewsets.ViewSet):
 
 
 class SearchView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         description='Get all decks list by filter and query',
@@ -169,14 +170,14 @@ class SearchView(APIView):
         decks = getDecks(filter)
         decks_data = []
         for deck in decks:
-            if query in deck.deck_name:
+            if query.lower() in deck.deck_name.lower():
                 decks_data.append(getDeckData(deck, user))
         logger.info(f"Find decks data: {decks_data}")
 
         folders = Folder.objects.all()
         folders_data = []
         for folder in folders:
-            if query in folder.folder_name:
+            if query.lower() in folder.folder_name.lower():
                 folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.folder_id})
         logger.info(f"Find folders data: {folders_data}")
 
@@ -185,6 +186,8 @@ class SearchView(APIView):
 
 
 class UserInfoAPIView(APIView):
+    permission_classes = [HasAPIKey]
+
     @extend_schema(
         parameters=[
             OpenApiParameter("userId", int)
@@ -212,7 +215,7 @@ class UserInfoAPIView(APIView):
 
 
 class UserLogsView(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         description='Handle deck viewed by user',

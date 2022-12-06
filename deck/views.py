@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils import json
 from rest_framework.views import APIView
+from rest_framework_api_key.permissions import HasAPIKey
 
 from deck.helpers.deck_helpers import logger, getDeckData
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
@@ -14,7 +15,7 @@ from deck.models import Deck, Folder, Courses
 
 
 class DeckViewSet(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         description='Create deck request',
@@ -112,7 +113,7 @@ class DeckViewSet(viewsets.ViewSet):
 
 
 class FolderViewSet(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         request=FolderCreateSerializer,
@@ -175,6 +176,8 @@ class FolderViewSet(viewsets.ViewSet):
 
 
 class CoursesAPIView(APIView):
+    permission_classes = [HasAPIKey]
+
     @extend_schema(
         request=inline_serializer("AddCourses",
                                   {"courses": inline_serializer(name="CourseData",
