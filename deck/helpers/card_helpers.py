@@ -78,6 +78,7 @@ def parseGoogleSheet(url_old):
 
         if not isinstance(question_cell.value, str):
             continue
+
         if question_image_cell.value is not None:
             raise ValidationError(f"In row-{row} question_image is not exist or not image")
 

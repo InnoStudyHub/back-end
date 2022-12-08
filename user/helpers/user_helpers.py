@@ -71,4 +71,7 @@ def setup_courses(user: User):
     courses = Courses.objects.filter(year=year)
     for course in courses:
         folder = Folder.objects.get_or_create(folder_name=course.course_name)
-        user_folder_permission = UserFolderPermission.objects.get_or_create(user=user, folder=folder[0], access_type=2)
+
+        if not UserFolderPermission.objects.filter(user=user, folder=folder[0], access_type=2).exists():
+            user_folder_permission = UserFolderPermission.objects.create(user=user, folder=folder[0], access_type=2)
+            user_folder_permission.save()
