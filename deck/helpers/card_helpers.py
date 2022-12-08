@@ -51,11 +51,14 @@ def getAnswerImageUrls(files, answer_image_keys, deck_id):
 
 
 def parseGoogleSheet(url_old):
-    match = re.search(r'docs.google.com/spreadsheets/d/\w+', url_old)
-    if not match:
+    match_key = re.search(r'docs.google.com/spreadsheets/d/[^/]+', url_old)
+    match_gid = re.search(r'gid=[0-9]+', url_old)
+    if not match_key:
         raise ValidationError("Not correct url")
-    sheet_key = match.group().split('/')[-1]
+    sheet_key = match_key.group().split('/')[-1]
     url = f'https://docs.google.com/spreadsheets/d/{sheet_key}/export?format=xlsx'
+    if match_gid:
+        url += f'&{str(match_gid.group())}'
     file = urllib.request.urlopen(url).read()
     doc = load_workbook(filename=BytesIO(file))
     sheet = doc[doc.sheetnames[0]]
