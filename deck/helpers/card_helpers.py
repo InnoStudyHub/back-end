@@ -74,12 +74,15 @@ def parseGoogleSheet(url_old):
         question_image_cell = sheet.cell(row, 2)
         answer_cell = sheet.cell(row, 3)
 
+        answer_text = 'No answer'
+
         if not isinstance(question_cell.value, str):
-            raise ValidationError(f"In row-{row} question is not exist")
+            continue
         if question_image_cell.value is not None:
             raise ValidationError(f"In row-{row} question_image is not exist or not image")
-        if not isinstance(answer_cell.value, str) and answer_cell.value is not None:
-            raise ValidationError(f"In row-{row} answer is not text")
+
+        if answer_cell.value is not None and isinstance(answer_cell.value, str):
+            answer_text = answer_cell.value
 
         answer_images = []
         for col in range(4, sheet.max_column + 1):
@@ -94,7 +97,7 @@ def parseGoogleSheet(url_old):
             question_image = image_loader.get(question_image_cell.coordinate)
 
         cards.append({"question_text": question_cell.value, "question_image": question_image,
-                      "answer_text": answer_cell.value, "answer_images": answer_images})
+                      "answer_text": answer_text, "answer_images": answer_images})
 
     return cards
 
