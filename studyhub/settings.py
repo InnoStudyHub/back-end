@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 from pathlib import Path
 import os
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,17 +43,10 @@ ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOSTS', '*')]
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = (
-    'content-disposition',
-    'accept-encoding',
-    'content-type',
-    'accept',
-    'origin',
-    'authorization',
-    'cache-control',
-    'x-api-key'
-)
+CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-api-key",
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -65,10 +59,10 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework_api_key',
-    'corsheaders',
     'user',
     'deck',
-    'user_action'
+    'user_action',
+    'corsheaders'
 ]
 
 # API Setup
@@ -117,8 +111,8 @@ SPECTACULAR_SETTINGS = {
 
 # Server settings
 MIDDLEWARE = [
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -127,8 +121,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CSRF_USE_SESSIONS = True
-CSRF_COOKIE_HTTPONLY = True
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_HTTPONLY = False
 
 ROOT_URLCONF = 'studyhub.urls'
 
