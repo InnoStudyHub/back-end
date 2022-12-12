@@ -4,7 +4,7 @@ from io import BytesIO
 import PIL.Image
 import re
 from PIL.ImageFile import ImageFile
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.uploadedfile import UploadedFile
 from google.cloud import storage
 from openpyxl.reader.excel import load_workbook
 from openpyxl_image_loader import SheetImageLoader
@@ -138,7 +138,7 @@ def toImage(file, key):
         img.save(b, "jpeg")
         img.show()
         return Image(key + ".jpg", file, "image/jpg")
-    elif isinstance(file, InMemoryUploadedFile):
+    elif isinstance(file, UploadedFile):
         if file.content_type == 'application/json':
             return Image(key + ".jpg", file.read(), "image/jpg")
         return Image(file.name, file.read(), file.content_type)
