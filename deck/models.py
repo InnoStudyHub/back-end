@@ -12,6 +12,9 @@ class Folder(models.Model):
     class Meta:
         db_table = 'folder'
 
+    def __str__(self):
+        return f"{self.folder_id}, {self.folder_name}"
+
 
 class Deck(models.Model):
     deck_id = models.AutoField(primary_key=True)
@@ -24,6 +27,9 @@ class Deck(models.Model):
 
     class Meta:
         db_table = 'deck'
+
+    def __str__(self):
+        return f"{self.deck_id}, {self.semester}, {self.folder.folder_name}, {self.deck_name} "
 
 
 class Card(models.Model):

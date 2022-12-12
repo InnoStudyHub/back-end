@@ -62,7 +62,8 @@ INSTALLED_APPS = [
     'user',
     'deck',
     'user_action',
-    'corsheaders'
+    'corsheaders',
+    'studyhub'
 ]
 
 # API Setup
