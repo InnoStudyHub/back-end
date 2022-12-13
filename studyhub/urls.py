@@ -1,12 +1,8 @@
 from django.contrib import admin
-from django.template.defaulttags import url
-from django.urls import path, include, re_path
+from django.urls import path, include
 
 from django.conf import settings
 from django.conf.urls.static import static
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-from rest_framework import permissions
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
@@ -20,6 +16,7 @@ urlpatterns = [
     path('folder/', include('deck.urls.folder_urls')),
     path('courses/', include('deck.urls.course_urls')),
     path('user/', include('user_action.urls')),
+    path('api/health_check/', include('health_check.urls')),
 ]
 
 

@@ -13,18 +13,35 @@ logger = logging.getLogger(__name__)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'app': {
+            'format': (
+                u'%(asctime)s [%(levelname)-8s] '
+                '(%(module)s.%(funcName)s) %(message)s'
+            ),
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'app'
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'when': 'D',
+            'interval': 7,
+            'backupCount': 1,
+            'encoding': 'utf8',
+            'filename': 'logs/debug.log',
+            'formatter': 'app'
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
+    'root': {'level': 'INFO', 'handlers': ['console', 'file']},
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
@@ -59,11 +76,13 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework_api_key',
+    'corsheaders',
+    'health_check',
+    'health_check.db',
+    'health_check.cache',
     'user',
     'deck',
     'user_action',
-    'corsheaders',
-    'studyhub'
 ]
 
 # API Setup
