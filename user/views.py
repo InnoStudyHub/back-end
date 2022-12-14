@@ -97,6 +97,7 @@ class UserIULoginView(viewsets.ViewSet):
         },
     )
     def auth_iu_with_code(self, request, *args, **kwargs):
+        logger.info(f"Handle login with iu request: {request.data}")
         code = str(request.data.get('code', ''))
         redirect_url = str(request.data.get('redirect_uri', ''))
         if not code:

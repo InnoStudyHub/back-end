@@ -55,7 +55,6 @@ class DeckViewSet(viewsets.ViewSet):
         if serializer.is_valid(raise_exception=True):
             serializer.save(author_id=user.id)
             response_data = getDeckData(serializer.instance, user)
-            logger.info(f"Deck successfully created: {response_data}")
             return Response(response_data, status=status.HTTP_201_CREATED)
         else:
             logger.warning("Something wrong with request body")
@@ -80,7 +79,6 @@ class DeckViewSet(viewsets.ViewSet):
             raise NotFound(f"Deck with id-{deck_id} does not exist")
 
         deck_data = getDeckData(Deck.objects.get(deck_id=deck_id), user)
-        logger.info(f"Deck data: {deck_data}")
         return Response(deck_data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -108,7 +106,6 @@ class DeckViewSet(viewsets.ViewSet):
 
         deck = user.deck_set.get(deck_name=deck_name, folder_id=folder_id)
         deck_data = getDeckData(deck, user)
-        logger.info(f"Deck data: {deck_data}")
         return Response(deck_data, status=status.HTTP_200_OK)
 
 
@@ -157,7 +154,6 @@ class FolderViewSet(viewsets.ViewSet):
         for deck_opened in decks:
             deck = Deck.objects.get(deck_id=deck_opened.deck_id)
             decks_data.append(getDeckData(deck, user))
-        logger.info(f"Recent deck datas: {decks_data}")
         return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -192,6 +188,7 @@ class CoursesAPIView(APIView):
         },
     )
     def post(self, request):
+        logger.info(f"Handle add courses request: {request.data}")
         courses_data = request.data.get('courses', [])
         for course_data in courses_data:
             course_name = course_data.get('course_name', '')
