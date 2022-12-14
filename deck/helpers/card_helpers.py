@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 
 from deck.dtos.image_dto import Image
 from deck.models import Deck
+from studyhub.settings import logger
 
 
 def isImage(image):
@@ -59,6 +60,7 @@ def parseGoogleSheet(url_old):
     url = f'https://docs.google.com/spreadsheets/d/{sheet_key}/export?format=xlsx'
     if match_gid:
         url += f'&{str(match_gid.group())}'
+    logger.info(f"new url {url}")
     file = urllib.request.urlopen(url).read()
     doc = load_workbook(filename=BytesIO(file))
     sheet = doc[doc.sheetnames[0]]
@@ -91,6 +93,7 @@ def parseGoogleSheet(url_old):
             if answer_image_cell.value is not None:
                 raise ValidationError(f"In row-{row} and column-{col} answer image is not image")
             if image_loader.image_in(answer_image_cell.coordinate):
+                logger.info(f"image cell-{answer_image_cell.coordinate}")
                 answer_images.append(image_loader.get(answer_image_cell.coordinate))
 
         question_image = None
