@@ -16,7 +16,6 @@ def getDeckData(deck, user):
     serializer = DeckDetailSerializer(data=data)
     if not serializer.is_valid(raise_exception=True):
         raise ValidationError(serializer.error_messages)
-    logger.info(f"DeckData successfully created: {serializer.data}")
     return serializer.data
 
 
@@ -29,7 +28,6 @@ def getDeckPreview(deck, user):
     serializer = DeckPreviewSerializer(data=data)
     if not serializer.is_valid(raise_exception=True):
         raise ValidationError(serializer.error_messages)
-    logger.info(f"DeckDataPreview successfully created: {serializer.data}")
     return serializer.data
 
 

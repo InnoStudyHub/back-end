@@ -20,11 +20,13 @@ def isImage(image):
 
 
 def uploadPublicFileToStorage(bucket_name, contents, destination_blob_name):
+    logger.info("Uploading image to storage")
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
     blob.upload_from_string(contents)
     blob.make_public()
+    logger.info(f"Image successfully upload {blob.public_url}")
     return blob.public_url
 
 
@@ -52,6 +54,7 @@ def getAnswerImageUrls(files, answer_image_keys, deck_id):
 
 
 def parseGoogleSheet(url_old):
+    logger.info(f"Parsing google sheet: {url_old}")
     match_key = re.search(r'docs.google.com/spreadsheets/d/[^/]+', url_old)
     match_gid = re.search(r'gid=[0-9]+', url_old)
     if not match_key:
@@ -60,7 +63,7 @@ def parseGoogleSheet(url_old):
     url = f'https://docs.google.com/spreadsheets/d/{sheet_key}/export?format=xlsx'
     if match_gid:
         url += f'&{str(match_gid.group())}'
-    logger.info(f"new url {url}")
+    logger.info(f"Parsed url {url}")
     file = urllib.request.urlopen(url).read()
     doc = load_workbook(filename=BytesIO(file))
     sheet = doc[doc.sheetnames[0]]
@@ -102,7 +105,7 @@ def parseGoogleSheet(url_old):
 
         cards.append({"question_text": question_cell.value, "question_image": question_image,
                       "answer_text": answer_text, "answer_images": answer_images})
-
+    logger.info(f"Found {len(cards)} cards")
     return cards
 
 
