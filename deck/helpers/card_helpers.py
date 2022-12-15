@@ -34,7 +34,8 @@ def uploadImage(files, deck_id, image_key):
     file = files.get(image_key)
     deck = Deck.objects.get(deck_id=deck_id)
     folder_name = deck.folder.folder_name
-    store_path = f'deck/{folder_name}/deck_{deck_id}/{image_key}_{file.name}'
+    extension = file.name.split('.')[-1]
+    store_path = f'decks/{folder_name}/{deck.semester}/{deck_id}_{deck.deck_name}/{image_key}.{extension}'
     return uploadPublicFileToStorage('studyhub-data', file.read(), store_path)
 
 
