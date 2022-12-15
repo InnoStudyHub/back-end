@@ -53,7 +53,7 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATIO
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
 
 # Debug mode
-DEBUG = os.environ.get('DEBUG', "True") == "True"
+DEBUG = not os.environ.get('DEBUG', "True") == "True"
 
 # Allowed hosts for request
 ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOSTS', '*')]
@@ -131,10 +131,10 @@ SPECTACULAR_SETTINGS = {
 
 # Server settings
 MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -212,10 +212,16 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
-STATIC_ROOT = '/static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = 'media_root'
+#DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+DEFAULT_FILE_STORAGE = 'studyhub.storage.GoogleCloudMediaStorage'
+STATICFILES_STORAGE = 'studyhub.storage.GoogleCloudStaticStorage'
+
+GS_MEDIA_BUCKET_NAME = 'studyhub-data'
+GS_BUCKET_NAME = 'studyhub-data'
+GS_PROJECT_ID = 'studyhub-364412'
+
+STATIC_URL = 'https://storage.googleapis.com/{}/'.format(GS_BUCKET_NAME)
+STATICFILES_DIRS = [STATIC_URL]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
