@@ -2,7 +2,6 @@ from django.contrib import admin
 
 from deck.models import Deck, Card, Folder, Courses, UserFolderPermission
 from user.models import User
-from user_action.models import DeckOpened
 
 
 @admin.register(Deck)
@@ -25,9 +24,29 @@ class CardAdmin(admin.ModelAdmin):
 
 @admin.register(Folder)
 class FolderAdmin(admin.ModelAdmin):
+    list_display = ("folder_id", "folder_name")
+    pass
+
+
+@admin.register(Courses)
+class CoursesAdmin(admin.ModelAdmin):
+    list_display = ("id", "course_name", "year")
+    pass
+
+
+@admin.register(UserFolderPermission)
+class UserFolderPermissionAdmin(admin.ModelAdmin):
+    list_display = ("user_email", "folder_name", "access_type")
+
+    def user_email(self, user_folder_permission):
+        return user_folder_permission.user.email
+
+    def folder_name(self, user_folder_permission):
+        return user_folder_permission.folder.folder_name
     pass
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
+    list_display = ("id", "email", "fullname", "is_admin")
     pass

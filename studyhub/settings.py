@@ -3,6 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 import os
 from corsheaders.defaults import default_headers
+from google.oauth2 import service_account
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,8 +50,13 @@ LOGGING = {
 }
 
 # Secrets
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '.data/google_cloud_key.json')
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
+
+#Google Cloud settings
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '.data/google_cloud_key.json')
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+GS_BUCKET_NAME = 'studyhub-data'
+GS_PROJECT_ID = 'studyhub-364412'
 
 # Debug mode
 DEBUG = os.environ.get('DEBUG', "True") == "True"
@@ -83,6 +89,7 @@ INSTALLED_APPS = [
     'user',
     'deck',
     'user_action',
+    'studyhub'
 ]
 
 # API Setup
@@ -212,14 +219,8 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-#DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 DEFAULT_FILE_STORAGE = 'studyhub.storage.GoogleCloudMediaStorage'
 STATICFILES_STORAGE = 'studyhub.storage.GoogleCloudStaticStorage'
-
-GS_MEDIA_BUCKET_NAME = 'studyhub-data'
-GS_BUCKET_NAME = 'studyhub-data'
-GS_PROJECT_ID = 'studyhub-364412'
-
 STATIC_URL = 'https://storage.googleapis.com/{}/'.format(GS_BUCKET_NAME)
 
 # Default primary key field type
