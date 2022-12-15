@@ -53,7 +53,7 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATIO
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
 
 # Debug mode
-DEBUG = not os.environ.get('DEBUG', "True") == "True"
+DEBUG = os.environ.get('DEBUG', "True") == "True"
 
 # Allowed hosts for request
 ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOSTS', '*')]
@@ -221,7 +221,6 @@ GS_BUCKET_NAME = 'studyhub-data'
 GS_PROJECT_ID = 'studyhub-364412'
 
 STATIC_URL = 'https://storage.googleapis.com/{}/'.format(GS_BUCKET_NAME)
-STATICFILES_DIRS = [STATIC_URL]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
