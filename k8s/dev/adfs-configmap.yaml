@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adfs-config
+  labels:
+    env: dev
+data:
+  ADFS_URL: 'sso.university.innopolis.ru/'
+  ADFS_CLIENT_ID: '02bdd68b-3508-40fa-aa30-c2b9e6f2f4c5'

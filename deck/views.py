@@ -1,19 +1,21 @@
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse, OpenApiParameter
 from rest_framework import status, viewsets, fields
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils import json
+from rest_framework.views import APIView
+from rest_framework_api_key.permissions import HasAPIKey
 
 from deck.helpers.deck_helpers import logger, getDeckData
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
     DeckDetailSerializer, DeckFromSheetSerializer
 from deck.serializers.folder_serializers import FolderCreateSerializer, FolderDetailSerializer
-from deck.models import Deck, Folder
+from deck.models import Deck, Folder, Courses
 
 
 class DeckViewSet(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         description='Create deck request',
@@ -53,7 +55,6 @@ class DeckViewSet(viewsets.ViewSet):
         if serializer.is_valid(raise_exception=True):
             serializer.save(author_id=user.id)
             response_data = getDeckData(serializer.instance, user)
-            logger.info(f"Deck successfully created: {response_data}")
             return Response(response_data, status=status.HTTP_201_CREATED)
         else:
             logger.warning("Something wrong with request body")
@@ -78,7 +79,6 @@ class DeckViewSet(viewsets.ViewSet):
             raise NotFound(f"Deck with id-{deck_id} does not exist")
 
         deck_data = getDeckData(Deck.objects.get(deck_id=deck_id), user)
-        logger.info(f"Deck data: {deck_data}")
         return Response(deck_data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -106,12 +106,11 @@ class DeckViewSet(viewsets.ViewSet):
 
         deck = user.deck_set.get(deck_name=deck_name, folder_id=folder_id)
         deck_data = getDeckData(deck, user)
-        logger.info(f"Deck data: {deck_data}")
         return Response(deck_data, status=status.HTTP_200_OK)
 
 
 class FolderViewSet(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         request=FolderCreateSerializer,
@@ -131,6 +130,33 @@ class FolderViewSet(viewsets.ViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
+        parameters=[
+            OpenApiParameter("folderId", int)
+        ],
+        request=None,
+        responses={
+            200: DeckDetailSerializer(many=True)
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        logger.info(f"Handle get folder data: {request.data}")
+        folder_id = request.GET.get('folderId', None)
+
+        if not folder_id:
+            raise ValidationError("folderId param does not exist")
+
+        if not Folder.objects.filter(folder_id=folder_id).exists():
+            raise NotFound("Folder not found")
+
+        decks = Folder.objects.get(folder_id=folder_id).deck_set.all()
+        decks_data = []
+        for deck_opened in decks:
+            deck = Deck.objects.get(deck_id=deck_opened.deck_id)
+            decks_data.append(getDeckData(deck, user))
+        return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
         responses={
             200: FolderDetailSerializer(many=True)
         }
@@ -143,3 +169,36 @@ class FolderViewSet(viewsets.ViewSet):
             folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.folder_id})
         logger.info(f"Folders data: {folders_data}")
         return Response(folders_data, status=status.HTTP_200_OK)
+
+
+class CoursesAPIView(APIView):
+    permission_classes = [HasAPIKey]
+
+    @extend_schema(
+        request=inline_serializer("AddCourses",
+                                  {"courses": inline_serializer(name="CourseData",
+                                                                fields={"course_name": fields.CharField(),
+                                                                        "course_year": fields.ChoiceField(
+                                                                            choices=(1, 2, 3, 4))
+                                                                        },
+                                                                many=True)}),
+        responses={
+            (201, 'text/plain'): OpenApiResponse(description="Courses successfully added"),
+            (400, 'text/plain'): OpenApiResponse(description="Some fields do not exist")
+        },
+    )
+    def post(self, request):
+        logger.info(f"Handle add courses request: {request.data}")
+        courses_data = request.data.get('courses', [])
+        for course_data in courses_data:
+            course_name = course_data.get('course_name', '')
+            course_year = course_data.get('course_year', None)
+
+            if not course_name or not course_year:
+                raise ValidationError('course_name or course_year field does not exist')
+
+            course = Courses.objects.get_or_create(course_name=course_name, year=course_year)
+            Folder.objects.get_or_create(folder_name=course[0].course_name)
+
+        return Response(f"{len(courses_data)} courses successfully added", status=201)
+

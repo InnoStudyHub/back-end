@@ -12,6 +12,9 @@ class Folder(models.Model):
     class Meta:
         db_table = 'folder'
 
+    def __str__(self):
+        return f"{self.folder_id}, {self.folder_name}"
+
 
 class Deck(models.Model):
     deck_id = models.AutoField(primary_key=True)
@@ -24,6 +27,9 @@ class Deck(models.Model):
 
     class Meta:
         db_table = 'deck'
+
+    def __str__(self):
+        return f"{self.deck_id}, {self.semester}, {self.folder.folder_name}, {self.deck_name} "
 
 
 class Card(models.Model):
@@ -39,6 +45,7 @@ class Card(models.Model):
     class Meta:
         db_table = 'card'
 
+
 class UserFolderPermission(models.Model):
     user_permission_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -47,3 +54,11 @@ class UserFolderPermission(models.Model):
 
     class Meta:
         db_table = 'user_folder_permission'
+
+
+class Courses(models.Model):
+    course_name = models.CharField(max_length=1024)
+    year = models.IntegerField()
+
+    class Meta:
+        db_table = 'course'

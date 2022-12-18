@@ -2,6 +2,8 @@ import logging
 from datetime import timedelta
 from pathlib import Path
 import os
+from corsheaders.defaults import default_headers
+from google.oauth2 import service_account
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,18 +14,35 @@ logger = logging.getLogger(__name__)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'app': {
+            'format': (
+                u'%(asctime)s [%(levelname)-8s] '
+                '(%(module)s.%(funcName)s) %(message)s'
+            ),
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'app'
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'when': 'D',
+            'interval': 7,
+            'backupCount': 1,
+            'encoding': 'utf8',
+            'filename': 'logs/debug.log',
+            'formatter': 'app'
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
+    'root': {'level': 'INFO', 'handlers': ['console', 'file']},
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'file'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
@@ -31,14 +50,26 @@ LOGGING = {
 }
 
 # Secrets
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '.data/google_cloud_key.json')
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
+
+#Google Cloud settings
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '.data/google_cloud_key.json')
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+GS_BUCKET_NAME = 'studyhub-data'
+GS_PROJECT_ID = 'studyhub-364412'
 
 # Debug mode
 DEBUG = os.environ.get('DEBUG', "True") == "True"
 
 # Allowed hosts for request
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOSTS', '*')]
+
+# CORS
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-api-key",
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -50,25 +81,44 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_spectacular',
     'rest_framework_simplejwt.token_blacklist',
+    'rest_framework_api_key',
+    'corsheaders',
+    'health_check',
+    'health_check.db',
+    'health_check.cache',
     'user',
     'deck',
-    'user_action'
+    'user_action',
+    'studyhub'
 ]
+
+# API Setup
+API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 
 # ADFS
 AUTH_ADFS = {
-    'URL': 'sso.university.innopolis.ru/',
-    'CLIENT_ID': '02bdd68b-3508-40fa-aa30-c2b9e6f2f4c5',
-    'CLIENT_SECRET': 'mK0gJz4Wq5gcQDOv2C59jjsJzNWCfqb91cgp5ltm'
+    'URL': os.environ.get('ADFS_URL', 'sso.university.innopolis.ru/'),
+    'CLIENT_ID': os.environ.get('ADFS_CLIENT_ID', '02bdd68b-3508-40fa-aa30-c2b9e6f2f4c5'),
+    'CLIENT_SECRET': os.environ.get('ADFS_CLIENT_SECRET', 'mK0gJz4Wq5gcQDOv2C59jjsJzNWCfqb91cgp5ltm')
+}
+
+# Moodle
+MOODLE_API = {
+    'URL': os.environ.get('MOODLE_URL', 'dev.moodle.innopolis.university/webservice/rest/server.php'),
+    'TOKEN': os.environ.get('MOODLE_TOKEN', 'f1cc7bed428ef04b92943587e41a03af')
 }
 
 # AUTH setup
 AUTH_USER_MODEL = 'user.User'
 
+# JWT
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework_api_key.permissions.HasAPIKey',
+    ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
@@ -88,17 +138,18 @@ SPECTACULAR_SETTINGS = {
 
 # Server settings
 MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CSRF_USE_SESSIONS = True
-CSRF_COOKIE_HTTPONLY = True
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_HTTPONLY = False
 
 ROOT_URLCONF = 'studyhub.urls'
 
@@ -131,7 +182,8 @@ DATABASES = {
         'HOST': os.environ.get('DB_HOST', '0.0.0.0'),
         'PORT': os.environ.get('DB_PORT', '3306'),
         'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4'
         }
     }
 }
@@ -167,7 +219,9 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
+DEFAULT_FILE_STORAGE = 'studyhub.storage.GoogleCloudMediaStorage'
+STATICFILES_STORAGE = 'studyhub.storage.GoogleCloudStaticStorage'
+STATIC_URL = 'https://storage.googleapis.com/{}/'.format(GS_BUCKET_NAME)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -13,7 +13,7 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=data/google_cloud_key.json
     command: >
             bash -c "python manage.py makemigrations && python manage.py migrate 
-            && python manage.py runserver 0.0.0.0:8000"
+            && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .data:/studyhub/data
     network_mode: "host"

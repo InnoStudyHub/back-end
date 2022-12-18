@@ -3,26 +3,28 @@ import time
 
 import requests
 from django.http import HttpResponse
-from drf_spectacular.utils import extend_schema, OpenApiResponse
-from rest_framework import status, viewsets
+from drf_spectacular.utils import extend_schema, OpenApiResponse, inline_serializer
+from rest_framework import status, viewsets, fields
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_api_key.permissions import HasAPIKey
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from studyhub import settings
 from studyhub.settings import logger
 from .helpers.user_helpers import register_iu_user
+from .models import User
 from .serializers import MyTokenObtainPairSerializer, UserSerializer
 from .serializers import RegistrationSerializer
 
 
 class RegistrationAPIView(GenericAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny, HasAPIKey]
     serializer_class = RegistrationSerializer
 
     @extend_schema(
@@ -42,7 +44,7 @@ class RegistrationAPIView(GenericAPIView):
 
 
 class MyObtainTokenPairView(TokenObtainPairView):
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, HasAPIKey)
     serializer_class = MyTokenObtainPairSerializer
 
     @extend_schema(
@@ -54,8 +56,12 @@ class MyObtainTokenPairView(TokenObtainPairView):
         return super().post(request, args, kwargs)
 
 
+class MyTokenRefreshView(TokenRefreshView):
+    permission_classes = (HasAPIKey,)
+
+
 class LogoutAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         request=None,
@@ -74,7 +80,7 @@ class LogoutAPIView(APIView):
 
 
 class UserAPIView(GenericAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
     serializer_class = UserSerializer
 
     def get(self, request, *args, **kwargs):
@@ -82,8 +88,16 @@ class UserAPIView(GenericAPIView):
 
 
 class UserIULoginView(viewsets.ViewSet):
+    @extend_schema(
+        request=inline_serializer(name='LoginWithIU',
+                                  fields={"code": fields.CharField(),
+                                          "redirect_uri": fields.CharField()}),
+        responses={
+            (200, 'text/plain'): OpenApiResponse(description="Successfully login")
+        },
+    )
     def auth_iu_with_code(self, request, *args, **kwargs):
-
+        logger.info(f"Handle login with iu request: {request.data}")
         code = str(request.data.get('code', ''))
         redirect_url = str(request.data.get('redirect_uri', ''))
         if not code:
@@ -109,4 +123,5 @@ class UserIULoginView(viewsets.ViewSet):
 
         data = json.loads(response.content)
         tokens = register_iu_user(access_token=data['access_token'], refresh_token=data['refresh_token'])
+
         return Response(tokens, status=200)

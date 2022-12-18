@@ -1,20 +1,22 @@
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse, OpenApiParameter
 from rest_framework import fields, status, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_api_key.permissions import HasAPIKey
 
 from deck.helpers.deck_helpers import getDecks, logger
-from deck.models import Deck, Folder
+from deck.models import Deck, Folder, UserFolderPermission
 from deck.serializers.deck_serializer import DeckDetailSerializer, DeckListSerializer
 from deck.serializers.folder_serializers import FolderDetailSerializer
 from deck.views import getDeckData
+from user.models import User
 from user_action.models import DeckOpened
 
 
 class FavouritesView(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         request=inline_serializer("FavouritesAdd", {"deck_id": fields.IntegerField()}, many=False),
@@ -79,7 +81,7 @@ class FavouritesView(viewsets.ViewSet):
 
 
 class UserDeckView(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         request=None,
@@ -115,9 +117,33 @@ class UserDeckView(viewsets.ViewSet):
         logger.info(f"Recent deck datas: {decks_data}")
         return Response(DeckDetailSerializer(decks_data, many=True).data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=None,
+        responses={
+            (200, 'application/json'): FolderDetailSerializer(many=True)
+        }
+    )
+    def get_for_you_decks(self, request, *args, **kwargs):
+        user = request.user
+        logger.info(f"Handle user for you deck request: {request.data}, from user {user.id}")
+        user_folder_permission = UserFolderPermission.objects.filter(user=user)
+        folders = []
+
+        if user_folder_permission.exists():
+            for permission in user_folder_permission:
+                folders.append(permission.folder)
+        else:
+            folders = Folder.objects.all()
+
+        folders_data = []
+        for folder in folders:
+            folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.folder_id})
+        logger.info(f"Folders data: {folders_data}")
+        return Response(folders_data, status=status.HTTP_200_OK)
+
 
 class SearchView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         description='Get all decks list by filter and query',
@@ -144,14 +170,14 @@ class SearchView(APIView):
         decks = getDecks(filter)
         decks_data = []
         for deck in decks:
-            if query in deck.deck_name:
+            if query.lower() in deck.deck_name.lower():
                 decks_data.append(getDeckData(deck, user))
         logger.info(f"Find decks data: {decks_data}")
 
         folders = Folder.objects.all()
         folders_data = []
         for folder in folders:
-            if query in folder.folder_name:
+            if query.lower() in folder.folder_name.lower():
                 folders_data.append({"folder_name": folder.folder_name, "folder_id": folder.folder_id})
         logger.info(f"Find folders data: {folders_data}")
 
@@ -159,8 +185,37 @@ class SearchView(APIView):
                         status=status.HTTP_200_OK)
 
 
+class UserInfoAPIView(APIView):
+    permission_classes = [HasAPIKey]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("userId", int)
+        ],
+        request=None,
+        responses={
+            200: inline_serializer(name='GetUserInfoById',
+                                   fields={"email": fields.CharField(),
+                                           "fullname": fields.CharField()})
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        user_id = request.GET.get('userId', None)
+        if not user_id:
+            raise ValidationError('userId param does not exist')
+        if User.objects.filter(id=user_id).exists():
+            user = User.objects.get(id=user_id)
+            user_response = {
+                "email": user.email,
+                "fullname": user.fullname
+            }
+            return Response(user_response, status=200)
+
+        return Response(f"User does not exist", status=404)
+
+
 class UserLogsView(viewsets.ViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, HasAPIKey)
 
     @extend_schema(
         description='Handle deck viewed by user',

@@ -4,7 +4,7 @@ from io import BytesIO
 import PIL.Image
 import re
 from PIL.ImageFile import ImageFile
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.files.uploadedfile import UploadedFile
 from google.cloud import storage
 from openpyxl.reader.excel import load_workbook
 from openpyxl_image_loader import SheetImageLoader
@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 
 from deck.dtos.image_dto import Image
 from deck.models import Deck
+from studyhub.settings import logger
 
 
 def isImage(image):
@@ -19,11 +20,13 @@ def isImage(image):
 
 
 def uploadPublicFileToStorage(bucket_name, contents, destination_blob_name):
+    logger.info("Uploading image to storage")
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
     blob.upload_from_string(contents)
     blob.make_public()
+    logger.info(f"Image successfully upload {blob.public_url}")
     return blob.public_url
 
 
@@ -31,7 +34,8 @@ def uploadImage(files, deck_id, image_key):
     file = files.get(image_key)
     deck = Deck.objects.get(deck_id=deck_id)
     folder_name = deck.folder.folder_name
-    store_path = f'deck/{folder_name}/deck_{deck_id}/{image_key}_{file.name}'
+    extension = file.name.split('.')[-1]
+    store_path = f'decks/{folder_name}/{deck.semester}/{deck_id}_{deck.deck_name}/{image_key}.{extension}'
     return uploadPublicFileToStorage('studyhub-data', file.read(), store_path)
 
 
@@ -51,11 +55,16 @@ def getAnswerImageUrls(files, answer_image_keys, deck_id):
 
 
 def parseGoogleSheet(url_old):
-    match = re.search(r'docs.google.com/spreadsheets/d/\w+', url_old)
-    if not match:
+    logger.info(f"Parsing google sheet: {url_old}")
+    match_key = re.search(r'docs.google.com/spreadsheets/d/[^/]+', url_old)
+    match_gid = re.search(r'gid=[0-9]+', url_old)
+    if not match_key:
         raise ValidationError("Not correct url")
-    sheet_key = match.group().split('/')[-1]
+    sheet_key = match_key.group().split('/')[-1]
     url = f'https://docs.google.com/spreadsheets/d/{sheet_key}/export?format=xlsx'
+    if match_gid:
+        url += f'&{str(match_gid.group())}'
+    logger.info(f"Parsed url {url}")
     file = urllib.request.urlopen(url).read()
     doc = load_workbook(filename=BytesIO(file))
     sheet = doc[doc.sheetnames[0]]
@@ -71,12 +80,16 @@ def parseGoogleSheet(url_old):
         question_image_cell = sheet.cell(row, 2)
         answer_cell = sheet.cell(row, 3)
 
+        answer_text = 'No answer'
+
         if not isinstance(question_cell.value, str):
-            raise ValidationError(f"In row-{row} question is not exist")
+            continue
+
         if question_image_cell.value is not None:
             raise ValidationError(f"In row-{row} question_image is not exist or not image")
-        if not isinstance(answer_cell.value, str) and answer_cell.value is not None:
-            raise ValidationError(f"In row-{row} answer is not text")
+
+        if answer_cell.value is not None and isinstance(answer_cell.value, str):
+            answer_text = answer_cell.value
 
         answer_images = []
         for col in range(4, sheet.max_column + 1):
@@ -84,6 +97,7 @@ def parseGoogleSheet(url_old):
             if answer_image_cell.value is not None:
                 raise ValidationError(f"In row-{row} and column-{col} answer image is not image")
             if image_loader.image_in(answer_image_cell.coordinate):
+                logger.info(f"image cell-{answer_image_cell.coordinate}")
                 answer_images.append(image_loader.get(answer_image_cell.coordinate))
 
         question_image = None
@@ -91,8 +105,8 @@ def parseGoogleSheet(url_old):
             question_image = image_loader.get(question_image_cell.coordinate)
 
         cards.append({"question_text": question_cell.value, "question_image": question_image,
-                      "answer_text": answer_cell.value, "answer_images": answer_images})
-
+                      "answer_text": answer_text, "answer_images": answer_images})
+    logger.info(f"Found {len(cards)} cards")
     return cards
 
 
@@ -131,7 +145,7 @@ def toImage(file, key):
         img.save(b, "jpeg")
         img.show()
         return Image(key + ".jpg", file, "image/jpg")
-    elif isinstance(file, InMemoryUploadedFile):
+    elif isinstance(file, UploadedFile):
         if file.content_type == 'application/json':
             return Image(key + ".jpg", file.read(), "image/jpg")
         return Image(file.name, file.read(), file.content_type)
