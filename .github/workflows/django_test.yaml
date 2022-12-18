@@ -39,6 +39,5 @@ jobs:
           python manage.py makemigrations
           python manage.py migrate
       - name: Run Tests
-        uses: actions/python-django-coverage-gitHub-action@0.9
-        with:
-          minimum-coverage: '86'
+        run: |
+          coverage run --source='.' manage.py test
