@@ -11,8 +11,7 @@ jobs:
           MYSQL_DATABASE: studyhub_dev
           MYSQL_USER: test
           MYSQL_PASSWORD: test
-        ports:
-          - 3306
+        ports: ['3306:3306']
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     runs-on: ubuntu-latest
@@ -30,7 +29,7 @@ jobs:
         DB_USER: test
         DB_PORT: 3306
         DB_PASSWORD: test
-        DB_HOST: localhost
+        DB_HOST: 127.0.0.1
       run: |
         
         python manage.py test
