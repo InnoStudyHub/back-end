@@ -12,4 +12,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - run: |
-          shopt -s globstar && pylint --load-plugins pylint_django --django-settings-module=example.settings **/*.py
+          shopt -s globstar && pylint --load-plugins pylint_django --django-settings-module=studyhub.settings **/*.py
