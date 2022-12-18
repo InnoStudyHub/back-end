@@ -3,6 +3,7 @@ name: Django Test
 on: push
 jobs:
   setup_db:
+    runs-on: ubuntu-latest
     steps:
       - uses: mirromutth/mysql-action@v1.1
         with:
