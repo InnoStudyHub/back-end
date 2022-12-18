@@ -31,7 +31,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Create and run Migrations
+      - name:
+        run: |
+          mysql --user=root --password=root ${{ env.DB_NAME }}
+          GRANT ALL PRIVILEGES ON test_${{ env.DB_NAME }}.* TO {{ env.DB_USER }}@'%';
+      - name: Create and run migrations
         run: |
           python manage.py makemigrations
           python manage.py migrate
