@@ -33,7 +33,7 @@ jobs:
           pip install -r requirements.txt
       - name:
         run: |
-          mysql --user=root --password=root ${{ env.DB_NAME }}
+          mysql --host={{ DB_HOST }} --user=root --password=root ${{ env.DB_NAME }}
           GRANT ALL PRIVILEGES ON test_${{ env.DB_NAME }}.* TO {{ env.DB_USER }}@'%';
       - name: Create and run migrations
         run: |
