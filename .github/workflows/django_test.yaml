@@ -3,25 +3,26 @@ name: Django Test
 on: push
 jobs:
   test:
+    env:
+      DB_NAME: studyhub_dev
+      DB_USER: test
+      DB_PORT: 3306
+      DB_PASSWORD: test
+      DB_HOST: 127.0.0.1
+
     services:
       mysql:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: studyhub_dev
-          MYSQL_USER: test
-          MYSQL_PASSWORD: test
+          MYSQL_DATABASE: ${{ env.DB_NAME }}
+          MYSQL_USER: ${{ env.DB_USER }}
+          MYSQL_PASSWORD: ${{ env.DB_PASSWORD }}
         ports: ['3306:3306']
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     runs-on: ubuntu-latest
     steps:
-      - env:
-          DB_NAME: studyhub_dev
-          DB_USER: test
-          DB_PORT: 3306
-          DB_PASSWORD: test
-          DB_HOST: 127.0.0.1
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
         with:
