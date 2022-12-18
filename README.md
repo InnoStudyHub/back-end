@@ -29,10 +29,29 @@ git clone https://github.com/InnoStudyHub/back-end.git
 cd ./back-end
 ```
 
-Build and run the project on your host:
-
+Install requirements:
 ```bash
 pip install requirements.txt
+```
+
+Run application
+```bash
+python manage.py runserver localhost:{port}
+```
+
+Application will open in
+```bash
+http://localhost:{port}
+```
+
+Health check
+```bash
+http://localhost:{port}/api/health_check/
+```
+
+Swagger
+```bash
+http://localhost:{port}/api/schema/swagger-ui/#/
 ```
 
 ## Docker and deployment
