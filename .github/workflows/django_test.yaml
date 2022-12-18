@@ -17,6 +17,7 @@ jobs:
           mysql user: 'test'
           mysql password: 'test'
   test:
+    needs: [setup_db]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
