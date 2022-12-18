@@ -2,7 +2,20 @@ name: Django Test
 
 on: push
 jobs:
-  build:
+  setup_db:
+    steps:
+      - uses: mirromutth/mysql-action@v1.1
+        with:
+          host port: 3306
+          container port: 3306
+          character set server: 'utf8'
+          collation server: 'utf8_general_ci'
+          mysql version: '8.0'
+          mysql database: 'studyhub_dev'
+          mysql root password: 'test'
+          mysql user: 'test'
+          mysql password: 'test'
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -13,5 +26,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run Tests
+      env:
+        DB_NAME: studyhub_dev
+        DB_USER: test
+        DB_PORT: 3306
+        DB_PASSWORD: test
+        DB_HOST: localhost
       run: |
         python manage.py test
