@@ -1,5 +1,10 @@
 name: python-linter
-on: pull_request
+on:
+  push:
+    tags:
+      - '!refs/tags/*'
+    branches:
+      - '*'
 jobs:
   pylint:
     runs-on: [ubuntu-latest]
