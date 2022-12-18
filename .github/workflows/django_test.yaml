@@ -16,6 +16,12 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+    - env:
+        DB_NAME: studyhub_dev
+        DB_USER: test
+        DB_PORT: 3306
+        DB_PASSWORD: test
+        DB_HOST: 127.0.0.1
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v1
       with:
@@ -28,20 +34,6 @@ jobs:
       run: |
         python manage.py makemigrations
         python manage.py migrate
-      env:
-        DBENGINE: django.db.backends.mysql
-        DBNAME: mysql
-        DBUSER: root
-        DBPASSWORD: zergling
-        DBHOST: 127.0.0.1
-        DBPORT: $
     - name: Run Tests
-      env:
-        DB_NAME: studyhub_dev
-        DB_USER: test
-        DB_PORT: 3306
-        DB_PASSWORD: test
-        DB_HOST: 127.0.0.1
       run: |
-        
         python manage.py test
