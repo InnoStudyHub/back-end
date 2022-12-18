@@ -62,6 +62,13 @@ You also can run application via docker:
 docker-compose up
 ```
 
+Deployed version of application is available:
+```bash
+http://api-test.studyhub.kz:8000
+http://api-test.studyhub.kz:8000/api/health_check/
+http://api-test.studyhub.kz:8000/api/schema/swagger-ui/#/
+```
+
 ## Tests
 
 The tests can be run in the project with the command
