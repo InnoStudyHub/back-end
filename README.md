@@ -37,11 +37,10 @@ pip install requirements.txt
 
 ## Docker and deployment
 
-You also can get image from the DockerHub:
+You also can run application via docker:
 
 ```bash
-docker pull diazzzu/studyhub:studyhub_back
-docker run diazzzu/studyhub:studyhub_back
+docker-compose up
 ```
 
 ## Tests
