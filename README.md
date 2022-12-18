@@ -40,8 +40,8 @@ pip install requirements.txt
 You also can get image from the DockerHub:
 
 ```bash
-docker pull
-docker run
+docker pull diazzzu/studyhub:studyhub_back
+docker run diazzzu/studyhub:studyhub_back
 ```
 
 ## Tests
@@ -49,7 +49,7 @@ docker run
 The tests can be run in the project with the command
 
 ```bash
-
+python manage.py test
 ```
 
 ## How to contribute
