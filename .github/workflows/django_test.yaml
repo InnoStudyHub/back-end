@@ -33,7 +33,7 @@ jobs:
           pip install -r requirements.txt
       - name:
         run: |
-          mysql -h127.0.0.1 -uroot --port 3306 -proot -e "SHOW DATABASES" studyhub_dev
+          mysql -h127.0.0.1 -uroot -proot -e "SHOW DATABASES" studyhub_dev
       - name: Create and run migrations
         run: |
           python manage.py makemigrations
