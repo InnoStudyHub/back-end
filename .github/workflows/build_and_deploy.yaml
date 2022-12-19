@@ -1,0 +1,20 @@
+name: Docker build and deploy
+on:
+  push:
+    tags:
+      - '!refs/tags/*'
+    branches:
+      - 'master'
+      - 'develop'
+      - 'test'
+
+jobs:
+  docker-build-prod:
+    uses: InnoStudyHub/back-end/.github/workflows/build_docker_image.yaml@
+    runs-on: [ubuntu-latest]
+    environment:
+      name: prod
+    secrets:
+      DOCKER_LOGIN: ${{secrets.DOCKER_LOGIN}}
+      DOCKER_NAME: ${{secrets.DOCKER_NAME}}
+      DOCKER_PWD: ${{secrets.DOCKER_PWD}}

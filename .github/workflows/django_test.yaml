@@ -3,6 +3,7 @@ name: Django Test
 on:
   pull_request:
     types: [opened, edited, reopened]
+  push:
 
 jobs:
   test:
@@ -33,7 +34,7 @@ jobs:
           cache: 'pip'
       - name:
         run: |
-          mysql -h{{ env.DB_HOST }} -uroot -p{{ env.DB_ROOT_PASSWORD }} -e "GRANT ALL PRIVILEGES ON test_{{ env.DB_NAME }}.*  TO '{{ env.DB_USER }}'@'%';" {{ env.DB_NAME }}
+          mysql -h${{ env.DB_HOST }} -uroot -p${{ env.DB_ROOT_PASSWORD }} -e "GRANT ALL PRIVILEGES ON test_${{ env.DB_NAME }}.*  TO '${{ env.DB_USER }}'@'%';" ${{ env.DB_NAME }}
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
