@@ -1,10 +1,10 @@
 name: python-linter
+
 on:
+  pull_request:
+    types: [opened, edited, reopened]
   push:
-    tags:
-      - '!refs/tags/*'
-    branches:
-      - '*'
+
 jobs:
   pylint:
     runs-on: [ubuntu-latest]
@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.8
+          cache: 'pip'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

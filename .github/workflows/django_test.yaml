@@ -1,20 +1,23 @@
 name: Django Test
 
-on: [push, pull_request]
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
 jobs:
   test:
     env:
       DB_NAME: studyhub_dev
       DB_USER: test
-      DB_PORT: 3306
       DB_PASSWORD: test
       DB_HOST: 127.0.0.1
+      DB_ROOT_PASSWORD: root
 
     services:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: {{ env.DB_ROOT_PASSWORD }}
           MYSQL_DATABASE: ${{ env.DB_NAME }}
           MYSQL_USER: ${{ env.DB_USER }}
           MYSQL_PASSWORD: ${{ env.DB_PASSWORD }}
@@ -27,9 +30,10 @@ jobs:
       - uses: actions/setup-python@v1
         with:
           python-version: 3.8
+          cache: 'pip'
       - name:
         run: |
-          mysql -h127.0.0.1 -uroot -proot -e "GRANT ALL PRIVILEGES ON test_studyhub_dev.*  TO 'test'@'%';" studyhub_dev
+          mysql -h{{ env.DB_HOST }} -uroot -p{{ env.DB_ROOT_PASSWORD }} -e "GRANT ALL PRIVILEGES ON test_{{ env.DB_NAME }}.*  TO '{{ env.DB_USER }}'@'%';" {{ env.DB_NAME }}
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
