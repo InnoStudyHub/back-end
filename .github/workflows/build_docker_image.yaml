@@ -6,15 +6,18 @@ on:
       tag:
         type: string
         required: true
-      secret-env:
-        type: string
+    secrets:
+      DOCKER_LOGIN:
+        required: true
+      DOCKER_NAME:
+        required: true
+      DOCKER_PWD:
         required: true
 
 jobs:
   docker-build:
     name: "Build and push docker"
     runs-on: [ ubuntu-latest ]
-    environment: DEV
     env:
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       NAME: ${{ secrets.DOCKER_NAME }}

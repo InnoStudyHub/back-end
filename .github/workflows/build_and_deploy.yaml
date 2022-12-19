@@ -13,4 +13,4 @@ jobs:
     uses: InnoStudyHub/back-end/.github/workflows/build_docker_image.yaml@develop
     with:
       tag: latest
-      secret-env: prod
+      environment: prod
