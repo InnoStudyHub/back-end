@@ -10,7 +10,7 @@ jobs:
     env:
       DB_NAME: studyhub_dev
       DB_USER: test
-      DB_PASSWORD: test
+      DB_PASSWORD: testxw
       DB_HOST: 127.0.0.1
       DB_ROOT_PASSWORD: root
 
