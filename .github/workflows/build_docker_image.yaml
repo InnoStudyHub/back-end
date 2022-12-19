@@ -15,7 +15,7 @@ jobs:
     name: "Build and push docker"
     runs-on: [ ubuntu-latest ]
     environment:
-      name: ${{ inputs.secret-env }}
+      name: prod
     env:
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       NAME: ${{ secrets.DOCKER_NAME }}
