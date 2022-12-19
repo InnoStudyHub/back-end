@@ -10,7 +10,7 @@ on:
 
 jobs:
   docker-build-prod:
-    uses: InnoStudyHub/back-end/.github/workflows/build_docker_image.yaml@
+    uses: InnoStudyHub/back-end/.github/workflows/build_docker_image.yaml@develop
     runs-on: [ubuntu-latest]
     environment:
       name: prod
