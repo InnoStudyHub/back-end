@@ -12,5 +12,5 @@ jobs:
   docker-build-prod:
     uses: InnoStudyHub/back-end/.github/workflows/build_docker_image.yaml@develop
     with:
-      tag: $GITHUB_RUN_NUMBER
+      tag: latest
       secret-env: prod
