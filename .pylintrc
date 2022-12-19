@@ -6,6 +6,7 @@ disable=
     C0114,
     C0115,
     C0116,
+    C0103,
     W1203,
     W0223
 
@@ -13,3 +14,9 @@ max-line-length=128
 
 load-plugins=
     pylint_django
+
+ignore=
+    migrations
+
+ignore-patterns=
+    \d{4}_.*?.py

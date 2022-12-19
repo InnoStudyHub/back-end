@@ -1,8 +1,8 @@
 import urllib.request
 from io import BytesIO
 
-import PIL.Image
 import re
+import PIL.Image
 from PIL.ImageFile import ImageFile
 from django.core.files.uploadedfile import UploadedFile
 from google.cloud import storage
