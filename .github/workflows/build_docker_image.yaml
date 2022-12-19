@@ -14,13 +14,14 @@ jobs:
   docker-build:
     name: "Build and push docker"
     runs-on: [ ubuntu-latest ]
-    environment: ${{ inputs.secret-env }}
+    environment:
+      name: ${{ inputs.secret-env }}
     env:
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       NAME: ${{ secrets.DOCKER_NAME }}
     steps:
       - run: |
-          echo $LOGIN
+          echo ${{ inputs.secret-env }}
       - name: Login to docker.io
         run: echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
       - uses: actions/checkout@master
