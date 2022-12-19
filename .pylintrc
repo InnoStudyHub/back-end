@@ -21,3 +21,14 @@ ignore=
 
 ignore-patterns=
     \d{4}_.*?.py
+
+fail-on=
+    F,
+    E
+
+msg-template=
+    {msg_id}: {path}: {line}:{column}: {msg} ({symbol})
+
+logging-modules=logging
+
+output-format=text:linter_report.txt,colorized
