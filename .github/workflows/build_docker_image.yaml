@@ -14,8 +14,7 @@ jobs:
   docker-build:
     name: "Build and push docker"
     runs-on: [ ubuntu-latest ]
-    environment:
-      name: DEV
+    environment: DEV
     env:
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       NAME: ${{ secrets.DOCKER_NAME }}
