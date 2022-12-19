@@ -5,18 +5,16 @@ on:
     inputs:
       tag:
         type: string
-    secrets:
-      DOCKER_LOGIN:
         required: true
-      DOCKER_NAME:
-        required: true
-      DOCKER_PWD:
+      secret-env:
+        type: string
         required: true
 
 jobs:
   docker-build:
     name: "Build and push docker"
     runs-on: [ ubuntu-latest ]
+    environment: ${{ inputs.secret-env }}
     env:
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       NAME: ${{ secrets.DOCKER_NAME }}
