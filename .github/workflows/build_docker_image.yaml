@@ -30,7 +30,7 @@ jobs:
       - run: |
           echo $LOGIN
       - name: Login to docker.io
-        run: echo ${{ secrets.DOCKER_PWD }} | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
+        run: echo $PWD | docker login -u $LOGIN --password-stdin
       - uses: actions/checkout@master
       - name: Build image
         run: docker build -t $LOGIN/$NAME:${{ inputs.tag }} .
