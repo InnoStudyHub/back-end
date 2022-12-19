@@ -17,6 +17,7 @@ load-plugins=
 
 ignore=
     migrations
+    manage.py
 
 ignore-patterns=
     \d{4}_.*?.py
