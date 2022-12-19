@@ -11,9 +11,6 @@ on:
 jobs:
   docker-build-prod:
     uses: InnoStudyHub/back-end/.github/workflows/build_docker_image.yaml@develop
-    environment:
-      name: prod
-    secrets:
-      DOCKER_LOGIN: ${{secrets.DOCKER_LOGIN}}
-      DOCKER_NAME: ${{secrets.DOCKER_NAME}}
-      DOCKER_PWD: ${{secrets.DOCKER_PWD}}
+    with:
+      tag: $GITHUB_RUN_NUMBER
+      secret-env: prod
