@@ -1,7 +1,7 @@
 import json
 
-import jwt
 from datetime import datetime
+import jwt
 
 import requests
 

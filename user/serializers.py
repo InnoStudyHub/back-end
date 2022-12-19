@@ -27,8 +27,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def get_token(cls, user):
-        token = super(MyTokenObtainPairSerializer, cls).get_token(user)
+    def get_token(self, user):
+        token = super().get_token(user)
         token['email'] = user.email
         return token
 

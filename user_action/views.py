@@ -211,7 +211,7 @@ class UserInfoAPIView(APIView):
             }
             return Response(user_response, status=200)
 
-        return Response(f"User does not exist", status=404)
+        return Response("User does not exist", status=404)
 
 
 class UserLogsView(viewsets.ViewSet):

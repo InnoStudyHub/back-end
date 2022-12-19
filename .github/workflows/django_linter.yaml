@@ -1,20 +1,26 @@
 name: python-linter
+
 on:
+  pull_request:
+    types: [opened, edited, reopened]
   push:
-    tags:
-      - '!refs/tags/*'
-    branches:
-      - '*'
+
 jobs:
   pylint:
     runs-on: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.8
-      - run: |
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - run: |
-          shopt -s globstar && pylint --load-plugins pylint_django --django-settings-module=studyhub.settings **/*.py
+      - name: Run linter
+        run: |
+          shopt -s globstar && pylint --django-settings-module=studyhub.settings */**/*.py
+      - name: Results to summary
+        run: |
+          cat linter_report.txt >> $GITHUB_STEP_SUMMARY

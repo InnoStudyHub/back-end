@@ -31,13 +31,14 @@ class DeckViewSet(viewsets.ViewSet):
         logger.info(f"Handle deck create request: {request.data}, from user {user.id}")
         data = json.loads(request.data['data'])
         serializer = DeckCreateSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(author_id=user.id, files=request.data)
-            response_data = getDeckData(serializer.instance, user)
-            return Response(response_data, status=status.HTTP_201_CREATED)
-        else:
+
+        if not serializer.is_valid(raise_exception=True):
             logger.warning("Something wrong with request body")
             raise ValidationError(serializer.error_messages)
+
+        serializer.save(author_id=user.id, files=request.data)
+        response_data = getDeckData(serializer.instance, user)
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         description='Create deck from sheet request',
@@ -48,17 +49,18 @@ class DeckViewSet(viewsets.ViewSet):
             (403, 'text/plain'): OpenApiResponse(description="Deck with this name exist")
         }
     )
-    def createFromGoogleSheet(self, request):
+    def create_from_google_sheet(self, request):
         user = request.user
         logger.info(f"Handle deck create from google sheet request: {request.data}, from user {user.id}")
         serializer = DeckFromSheetSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(author_id=user.id)
-            response_data = getDeckData(serializer.instance, user)
-            return Response(response_data, status=status.HTTP_201_CREATED)
-        else:
+
+        if not serializer.is_valid(raise_exception=True):
             logger.warning("Something wrong with request body")
             raise ValidationError(serializer.error_messages)
+
+        serializer.save(author_id=user.id)
+        response_data = getDeckData(serializer.instance, user)
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         description='Get deck by id',
@@ -122,12 +124,13 @@ class FolderViewSet(viewsets.ViewSet):
     def create(self, request, *args, **kwargs):
         logger.info(f"Handle create folder request: {request.data}")
         serializer = FolderCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            folder = serializer.save()
-            logger.info(f"Folder created: {folder}")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
+
+        if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        folder = serializer.save()
+        logger.info(f"Folder created: {folder}")
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         parameters=[
@@ -201,4 +204,3 @@ class CoursesAPIView(APIView):
             Folder.objects.get_or_create(folder_name=course[0].course_name)
 
         return Response(f"{len(courses_data)} courses successfully added", status=201)
-

@@ -1,6 +1,7 @@
 from django.urls import path
 
-from .views import RegistrationAPIView, UserAPIView, LogoutAPIView, UserIULoginView, MyTokenRefreshView
+from .views import RegistrationAPIView, UserAPIView, \
+    LogoutAPIView, UserIULoginView, MyTokenRefreshView
 from .views import MyObtainTokenPairView
 
 urlpatterns = [

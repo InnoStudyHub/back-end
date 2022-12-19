@@ -25,13 +25,11 @@ class CardAdmin(admin.ModelAdmin):
 @admin.register(Folder)
 class FolderAdmin(admin.ModelAdmin):
     list_display = ("folder_id", "folder_name")
-    pass
 
 
 @admin.register(Courses)
 class CoursesAdmin(admin.ModelAdmin):
     list_display = ("id", "course_name", "year")
-    pass
 
 
 @admin.register(UserFolderPermission)
@@ -43,10 +41,8 @@ class UserFolderPermissionAdmin(admin.ModelAdmin):
 
     def folder_name(self, user_folder_permission):
         return user_folder_permission.folder.folder_name
-    pass
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ("id", "email", "fullname", "is_admin")
-    pass

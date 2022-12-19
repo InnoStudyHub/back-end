@@ -1,0 +1,32 @@
+name: Docker build and deploy
+on:
+  push:
+    tags:
+      - '!refs/tags/*'
+    branches:
+      - 'master'
+      - 'develop'
+      - 'test'
+
+jobs:
+  docker-build-prod:
+    if: github.ref == 'refs/heads/master'
+    uses: InnoStudyHub/back-end/.github/workflows/build_docker_image.yaml@master
+    with:
+      tag: latest
+      environment: prod
+    secrets:
+      DOCKER_LOGIN: ${{ secrets.DOCKER_LOGIN }}
+      DOCKER_NAME: ${{ secrets.DOCKER_NAME }}
+      DOCKER_PWD: ${{ secrets.DOCKER_PWD }}
+
+  docker-build-dev:
+    if: github.ref == 'refs/heads/develop'
+    uses: InnoStudyHub/back-end/.github/workflows/build_docker_image.yaml@develop
+    with:
+      tag: dev_latest
+      environment: dev
+    secrets:
+      DOCKER_LOGIN: ${{ secrets.DOCKER_LOGIN }}
+      DOCKER_NAME: ${{ secrets.DOCKER_NAME }}
+      DOCKER_PWD: ${{ secrets.DOCKER_PWD }}

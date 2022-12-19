@@ -1,0 +1,36 @@
+[MAIN]
+
+py-version = 3.8
+
+disable=
+    C0114,
+    C0115,
+    C0116,
+    C0103,
+    W1203,
+    W0223
+
+max-line-length=128
+
+load-plugins=
+    pylint_django
+
+ignore=
+    migrations
+    manage
+
+ignore-patterns=
+    \d{4}_.*?.py
+
+fail-on=
+    F,
+    E
+
+fail-under=9.0
+
+msg-template=
+    {msg_id}: {path}: {line}:{column}: {msg} ({symbol})
+
+logging-modules=logging
+
+output-format=text:linter_report.txt,colorized

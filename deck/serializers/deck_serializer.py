@@ -18,7 +18,7 @@ class DeckCreateSerializer(serializers.Serializer):
 
     def validate_folder_id(self, value):
         if not Folder.objects.filter(folder_id=value):
-            raise NotFound(f"Folder does not exist")
+            raise NotFound("Folder does not exist")
         return value
 
     def create_card(self, card, deck_id, files):
