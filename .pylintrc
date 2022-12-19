@@ -26,6 +26,8 @@ fail-on=
     F,
     E
 
+fail-under=9.0
+
 msg-template=
     {msg_id}: {path}: {line}:{column}: {msg} ({symbol})
 
