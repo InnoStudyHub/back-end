@@ -17,7 +17,7 @@ LOGGING = {
     'formatters': {
         'app': {
             'format': (
-                u'%(asctime)s [%(levelname)-8s] '
+                '%(asctime)s [%(levelname)-8s] '
                 '(%(module)s.%(funcName)s) %(message)s'
             ),
             'datefmt': '%Y-%m-%d %H:%M:%S',
@@ -221,7 +221,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 DEFAULT_FILE_STORAGE = 'studyhub.storage.GoogleCloudMediaStorage'
 STATICFILES_STORAGE = 'studyhub.storage.GoogleCloudStaticStorage'
-STATIC_URL = 'https://storage.googleapis.com/{}/'.format(GS_BUCKET_NAME)
+STATIC_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

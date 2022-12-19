@@ -4,7 +4,6 @@ from rest_framework.test import APITestCase
 from rest_framework_api_key.models import APIKey
 
 from deck.models import Folder
-from user.models import User
 
 
 class FolderTests(APITestCase):

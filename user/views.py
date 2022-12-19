@@ -1,8 +1,7 @@
 import json
-import time
 
 import requests
-from django.http import HttpResponse
+from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema, OpenApiResponse, inline_serializer
 from rest_framework import status, viewsets, fields
 from rest_framework.exceptions import ValidationError
@@ -18,7 +17,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from studyhub import settings
 from studyhub.settings import logger
 from .helpers.user_helpers import register_iu_user
-from .models import User
 from .serializers import MyTokenObtainPairSerializer, UserSerializer
 from .serializers import RegistrationSerializer
 
@@ -34,13 +32,14 @@ class RegistrationAPIView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         logger.info(f"Handle register user request: {request.data}")
         serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.save()
-            tokens = MyTokenObtainPairSerializer(request.data).validate(request.data)
-            logger.info(f"User created: {user}")
-            return Response(tokens, status=status.HTTP_201_CREATED)
-        else:
+
+        if not serializer.is_valid(raise_exception=True):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        user = serializer.save()
+        tokens = MyTokenObtainPairSerializer(request.data).validate(request.data)
+        logger.info(f"User created: {user}")
+        return Response(tokens, status=status.HTTP_201_CREATED)
 
 
 class MyObtainTokenPairView(TokenObtainPairView):
@@ -84,7 +83,7 @@ class UserAPIView(GenericAPIView):
     serializer_class = UserSerializer
 
     def get(self, request, *args, **kwargs):
-        return HttpResponse(self.request.user, content_type="application/json")
+        return JsonResponse(self.request.user)
 
 
 class UserIULoginView(viewsets.ViewSet):
