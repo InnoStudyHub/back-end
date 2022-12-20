@@ -29,19 +29,44 @@ git clone https://github.com/InnoStudyHub/back-end.git
 cd ./back-end
 ```
 
-Build and run the project on your host:
-
+Install requirements:
 ```bash
 pip install requirements.txt
 ```
 
+Run application
+```bash
+python manage.py runserver localhost:{port}
+```
+
+Application will open in
+```bash
+http://localhost:{port}
+```
+
+Health check
+```bash
+http://localhost:{port}/api/health_check/
+```
+
+Swagger
+```bash
+http://localhost:{port}/api/schema/swagger-ui/#/
+```
+
 ## Docker and deployment
 
-You also can get image from the DockerHub:
+You also can run application via docker:
 
 ```bash
-docker pull
-docker run
+docker-compose up
+```
+
+Deployed version of application is available:
+```bash
+http://api-test.studyhub.kz:8000
+http://api-test.studyhub.kz:8000/api/health_check/
+http://api-test.studyhub.kz:8000/api/schema/swagger-ui/#/
 ```
 
 ## Tests
@@ -49,7 +74,7 @@ docker run
 The tests can be run in the project with the command
 
 ```bash
-
+python manage.py test
 ```
 
 ## How to contribute
