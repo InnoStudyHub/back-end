@@ -18,6 +18,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          touch .data/google_cloud_key.json
       - name: Run linter
         run: |
           shopt -s globstar && pylint --django-settings-module=studyhub.settings */**/*.py
