@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 
 from deck.dtos.image_dto import Image
 from deck.models import Deck
-from studyhub.settings import logger
+from studyhub.settings import logger, GS_DATA_BUCKET_NAME
 
 
 def isImage(image):
@@ -36,7 +36,8 @@ def uploadImage(files, deck_id, image_key):
     folder_name = deck.folder.folder_name
     extension = file.name.split('.')[-1]
     store_path = f'decks/{folder_name}/{deck.semester}/{deck_id}_{deck.deck_name}/{image_key}.{extension}'
-    return uploadPublicFileToStorage('studyhub-data', file.read(), store_path)
+    bucket_name = GS_DATA_BUCKET_NAME
+    return uploadPublicFileToStorage(bucket_name, file.read(), store_path)
 
 
 def getQuestionImageUrl(question_image_key, files, deck_id):

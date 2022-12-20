@@ -1,10 +1,8 @@
-sudo apt update
-sudo apt install docker.io -y
-sudo apt install docker-compose -y
+export $(grep -v '^#' ~/.env | xargs)
 pkill -f runserver
 
-sudo docker login -u $LOGIN -p $PWD
+sudo docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
 sudo docker system prune --all -f
-sudo docker-compose down
-sudo docker-compose pull
-sudo docker-compose up -d
+sudo docker compose down
+sudo docker compose pull
+sudo docker compose up -d

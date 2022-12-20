@@ -1,0 +1,77 @@
+name: Create and Publish Docker Image
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      environment:
+        type: string
+        required: true
+    secrets:
+      DOCKER_LOGIN:
+        required: true
+      DOCKER_PWD:
+        required: true
+      DOCKER_NAME:
+        required: true
+      SSH_USER:
+        required: true
+      SSH_KEY:
+        required: true
+      SSH_HOST:
+        required: true
+      ENVFILE:
+        required: true
+      BUCKET_NAME:
+        required: true
+
+jobs:
+  deploy:
+    name: "Deploy to staging"
+    runs-on: [ ubuntu-latest ]
+    environment: ${{ inputs.environment }}
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      DOCKER_LOGIN: ${{ secrets.DOCKER_LOGIN }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PWD }}
+      DOCKER_NAME: ${{ secrets.DOCKER_NAME }}
+      DOCKER_TAG: ${{ inputs.tag }}
+      ENVFILE: ${{ secrets.ENVFILE }}
+      BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+
+      - uses: actions/checkout@master
+
+      - name: Create env file
+        run: |
+          echo -e $ENVFILE >> .env
+          echo DOCKER_LOGIN=$DOCKER_LOGIN >> .env
+          echo DOCKER_PASSWORD=$DOCKER_PASSWORD >> .env
+          echo DOCKER_NAME=$DOCKER_NAME >> .env
+          echo DOCKER_TAG=$DOCKER_TAG >> .env
+          echo BUCKET_NAME=$BUCKET_NAME >> .env
+
+      - name: Copy files to vm
+        run: |
+          scp docker-compose.yaml staging:~/docker-compose.yaml
+          scp .env staging:~/.env
+
+      - name: Run deploy.sh
+        run: |
+          envsubst < deploy.sh | ssh staging sh

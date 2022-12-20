@@ -3,14 +3,13 @@ name: Django Test
 on:
   pull_request:
     types: [opened, edited, reopened]
-  push:
 
 jobs:
   test:
     env:
       DB_NAME: studyhub_dev
       DB_USER: test
-      DB_PASSWORD: testxw
+      DB_PASSWORD: test
       DB_HOST: 127.0.0.1
       DB_ROOT_PASSWORD: root
 
