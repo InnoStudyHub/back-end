@@ -68,7 +68,7 @@ jobs:
           scp docker-compose.yaml staging:~/docker-compose.yaml
           scp .env staging:~/.env
 
-      #- name: Run deploy.sh
-      #  run: |
-      #    export $(grep -v '^#' .env | xargs)
-      #    envsubst < deploy.sh | ssh staging sh
+      - name: Run deploy.sh
+        run: |
+          export $(grep -v '^#' ~/.env | xargs) | ssh staging sh
+          envsubst < deploy.sh | ssh staging sh
