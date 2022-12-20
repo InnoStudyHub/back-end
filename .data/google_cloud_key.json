@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "studyhub-372200",
+  "private_key_id": "03f021cbf1ea73012a4e548c5bfd524c8149cd07",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC1OWPrm+YzXxwL\npqL1Mg6OwEMUBkmR6UcCWwutckw64H2AJBhT/W3FefT/fiK+f7EiTHI07HDYBC5h\nODxtCy7HozzxQTuQdNb0iaaQvwGm6NTv3Lu26XenfDGNLg/jI26HycNVu6aXSKan\n8o1eiV+D6al+zq0z30iH/Lfmjvm5FvOTFu93f29MLwNoBbtWM+PhW3wk+RVL3jZz\nHevgkBewS5Js0g1t/W1WGxXKHaC/DnP8IMLY0jHzQzvwc6L8PT3LvYMub5+Kg+Xo\nlHNHPaNxOihyNQ2Ph11rtfLEq+1Nz3per8QKuf3UppFqpdLdkIBJ3+f7KKIVOmEr\n1RYRKh+nAgMBAAECggEABpWHKSulLwMoZx1YpSi/dGu5aRa4ntsRHET92OO2dJrY\n0zG8hewL2wuW7Cig59T80mh018XHzwC6p7kKNZfYOXGXeeIcV2SByWRpMddPT/CZ\n/0uPdeXUaaSf0aKh0r/kEWoKvy11MAgfkyn0X+lTtaGMTEM+aBYrKAQc2KRex0k+\nVwqJgKPpP1GrhYFgm9mGT7u/DTPulbjyFwQ8LYmn49Cz7sjsn8M5HktkuHD+cuMH\nK7iFg5blomQNAHdcaR9rLeNLRFcnTrwfbK1C+vxCQMOFGekZ+nER7pm5Luw9um/0\nhgDlraylnYJI3ZKbFYoJR2DO8t3QwvtXQgcSk2BYbQKBgQDZFSol0aLzmjYv17cT\n407Wl7PGarnmM9gxSRwTGgvYnZzohYu2z6zY38mq2gpxUSgDUdW54eMKpBw2cDiW\n4rrflyxmyc+uiclDPb554Orzk5Ua51j17UM36EmNMO1i4Z+mjgJv3EBS9DNEGrqQ\niC6JirXgCr7wZ0errcLaOo20ZQKBgQDVtodjFEGq/W2gchw3fenHFtOtmmYk55FT\n1S3lI7FrUJjynVTZtLk21I39MappBFnMdypBK9Itv/h+voFovBvHDendiAOvFSkU\nJKgJGGXQ1WcfIPe4KLbK/+K0TOhXCAlZYBIcGZ2AURN187srjr8BaqScFwUcgqD1\nYjKBpHelGwKBgBr2cgG4hBDVup0+odKqjQRCW2Xto6FgFx4oAoCs34PML80BqVTP\nfpyBTz8VTe69MccXxwALenO75nUsgxralnNnB3DM6Cq5mnHrnVjuAsC2N/LbgUUq\nbwrmoxwSU6nQdE/vm4XhSWwEQMnYuAtznrQesnBdZVHewhwkvOr2EtuxAoGBAJtl\nvBBZXF6fJKW0E7xt/B1eBdGIIZnYIB5bNqIVUB7+XhicOmSLOtoZuJ1RDd6K4VkB\nlWIKISxPGLvgfmzPy0r0XQdOrY8TzejttpnWecJeSjuiVz47rJ7zbb845QDTwSiR\n6Nkx7wqs6X+tGH5Vr6GyD7vIKVlPywZivuLx2mXdAoGBAJ3wg4JewfZkndwht4NK\n+q1c/fRLSLPzPCtQJTfl45INP2PlbSQVkit+oQqQ74QO0EHCO4B7hDMHH17rJnci\nLi9XnKIkou5/YgA3lqtxcCN6VezA6xIRcXBTyY7jGeAXkgt5ndxA4R6kZpgwaVfj\ncIkR3o7X35YAPuZ3kIiNABHO\n-----END PRIVATE KEY-----\n",
+  "client_email": "studyhub-dev-storage@studyhub-372200.iam.gserviceaccount.com",
+  "client_id": "102696683916235288251",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/studyhub-dev-storage%40studyhub-372200.iam.gserviceaccount.com"
+}
