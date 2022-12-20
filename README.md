@@ -1,6 +1,7 @@
 # Study Hub API
-
-![Build and deploy](https://github.com/InnoStudyHub/back-end/actions/workflows/studyhub_actions.yaml/badge.svg)
+[![Deploy](https://github.com/InnoStudyHub/back-end/actions/workflows/build_and_deploy.yaml/badge.svg)](https://github.com/InnoStudyHub/back-end/actions/workflows/build_and_deploy.yaml)
+[![Django Test](https://github.com/InnoStudyHub/back-end/actions/workflows/django_test.yaml/badge.svg)](https://github.com/InnoStudyHub/back-end/actions/workflows/django_test.yaml)
+[![Linter](https://github.com/InnoStudyHub/back-end/actions/workflows/django_linter.yaml/badge.svg)](https://github.com/InnoStudyHub/back-end/actions/workflows/django_linter.yaml)
 
 ## About the project
 
