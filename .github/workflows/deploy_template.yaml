@@ -57,7 +57,7 @@ jobs:
 
       - name: Create env file
         run: |
-          echo $ENVFILE >> .env
+          echo -e $ENVFILE >> .env
           echo DOCKER_LOGIN=$DOCKER_LOGIN >> .env
           echo DOCKER_PASSWORD=$DOCKER_PASSWORD >> .env
           echo DOCKER_TAG=$DOCKER_TAG >> .env
