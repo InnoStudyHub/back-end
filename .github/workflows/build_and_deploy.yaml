@@ -33,6 +33,7 @@ jobs:
 
   deploy-dev:
     if: github.ref == 'refs/heads/develop'
+    needs: [docker-build-dev]
     uses: InnoStudyHub/back-end/.github/workflows/deploy_template.yaml@develop
     with:
       tag: dev_latest
@@ -45,3 +46,4 @@ jobs:
       SSH_KEY: ${{ secrets.SSH_KEY }}
       SSH_HOST: ${{ secrets.SSH_HOST }}
       ENVFILE: ${{ secrets.ENVFILE }}
+      BUCKET_NAME: ${{ secrets.BUCKET_NAME }}

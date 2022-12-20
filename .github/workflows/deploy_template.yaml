@@ -24,6 +24,8 @@ on:
         required: true
       ENVFILE:
         required: true
+      BUCKET_NAME:
+        required: true
 
 jobs:
   deploy:
@@ -39,6 +41,7 @@ jobs:
       DOCKER_NAME: ${{ secrets.DOCKER_NAME }}
       DOCKER_TAG: ${{ inputs.tag }}
       ENVFILE: ${{ secrets.ENVFILE }}
+      BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
     steps:
       - name: Configure SSH
         run: |
@@ -62,6 +65,7 @@ jobs:
           echo DOCKER_PASSWORD=$DOCKER_PASSWORD >> .env
           echo DOCKER_NAME=$DOCKER_NAME >> .env
           echo DOCKER_TAG=$DOCKER_TAG >> .env
+          echo BUCKET_NAME=$BUCKET_NAME >> .env
 
       - name: Copy files to vm
         run: |
