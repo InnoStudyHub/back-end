@@ -60,6 +60,7 @@ jobs:
           echo -e $ENVFILE >> .env
           echo DOCKER_LOGIN=$DOCKER_LOGIN >> .env
           echo DOCKER_PASSWORD=$DOCKER_PASSWORD >> .env
+          echo DOCKER_NAME=$DOCKER_NAME >> .env
           echo DOCKER_TAG=$DOCKER_TAG >> .env
 
       - name: Copy files to vm
