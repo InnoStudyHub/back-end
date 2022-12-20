@@ -70,5 +70,4 @@ jobs:
 
       - name: Run deploy.sh
         run: |
-          export $(grep -v '^#' ~/.env | xargs) | ssh staging sh
           envsubst < deploy.sh | ssh staging sh

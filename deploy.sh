@@ -1,6 +1,4 @@
-sudo apt update
-sudo apt install docker.io -y
-sudo apt install docker-compose -y
+export $(grep -v '^#' ~/.env | xargs)
 pkill -f runserver
 
 sudo docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
