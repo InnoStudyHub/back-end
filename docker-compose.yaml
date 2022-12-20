@@ -2,15 +2,15 @@ version: "2"
 
 services:
   app:
-    image: diazzzu/studyhub:latest
+    image: ${DOCKER_LOGIN}/${DOCKER_NAME}:${DOCKER_TAG}
     environment:
-      - DB_PORT=3306
-      - DB_NAME=studyhub_dev
-      - DB_HOST=127.0.0.1
-      - DB_USER=diazzzu
-      - DB_PASSWORD=pass1234
-      - DEBUG=False
-      - GOOGLE_APPLICATION_CREDENTIALS=data/google_cloud_key.json
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DEBUG=${DEBUG}
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
     command: >
             bash -c "python manage.py makemigrations && python manage.py migrate 
             && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
