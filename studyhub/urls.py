@@ -13,6 +13,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('user.urls')),
     path('deck/', include('deck.urls.deck_urls')),
+    path('card/', include('deck.urls.card_urls')),
     path('folder/', include('deck.urls.folder_urls')),
     path('courses/', include('deck.urls.course_urls')),
     path('user/', include('user_action.urls')),

@@ -1,6 +1,6 @@
 from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse, OpenApiParameter
 from rest_framework import status, viewsets, fields
-from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils import json
@@ -11,7 +11,7 @@ from deck.helpers.deck_helpers import logger, getDeckData
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
     DeckDetailSerializer, DeckFromSheetSerializer
 from deck.serializers.folder_serializers import FolderCreateSerializer, FolderDetailSerializer
-from deck.models import Deck, Folder, Courses
+from deck.models import Deck, Folder, Courses, Card
 
 
 class DeckViewSet(viewsets.ViewSet):
@@ -204,3 +204,57 @@ class CoursesAPIView(APIView):
             Folder.objects.get_or_create(folder_name=course[0].course_name)
 
         return Response(f"{len(courses_data)} courses successfully added", status=201)
+
+
+class CardViewSet(viewsets.ViewSet):
+    permission_classes = (IsAuthenticated, HasAPIKey)
+
+    @extend_schema(
+        description='Create deck request',
+        request=inline_serializer(name="DeleteCardRequest",
+                                  fields={"deck_id": fields.IntegerField(),
+                                          "cards_id": fields.ListField(child=fields.IntegerField())
+                                          }),
+        responses={
+            200: inline_serializer(name="DeleteCardResponse",
+                                   fields={
+                                        "errors": fields.ListField(child=fields.IntegerField())
+                                   }),
+            (400, 'text/plain'): OpenApiResponse(description="Some fields is not exist"),
+            (404, 'text/plain'): OpenApiResponse(description="Deck is not found")
+        }
+    )
+    def delete_cards(self, request):
+        logger.info(f"Handle delete card request: {request.data}")
+        user = request.user
+        deck_id = request.data.get('deck_id', None)
+        cards_id = request.data.get('cards_id', [])
+        if deck_id is None:
+            raise ValidationError('Parameter deck_id does not exist')
+
+        deck = Deck.objects.filter(deck_id=deck_id).first()
+        if deck is None:
+            raise NotFound(f'Deck with deck_id={deck_id} does not exist')
+
+        if deck.author is not user:
+            raise PermissionDenied(f'User is not allowed to modify deck={deck_id}')
+
+        cards = Card.objects.filter(card_id__in=cards_id, deck_id=deck_id)
+
+        for card in cards:
+            cards_id.remove(card.card_id)
+            card.delete()
+
+        data = {}
+        if cards_id:
+            logger.info(f"Error cards id: {cards_id}")
+            data['errors'] = cards_id
+
+        return Response(data, status=200)
+
+    def copy_card(self, request):
+        logger.info(f"Handle copy card request: {request.data}")
+        source_card_id = request.data.get('source_card_id', None)
+        destination_deck_id = request.data.get('destination_deck_id', None)
+        
+
