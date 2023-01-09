@@ -47,3 +47,20 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       ENVFILE: ${{ secrets.ENVFILE }}
       BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/master'
+    needs: [ docker-build-prod ]
+    uses: InnoStudyHub/back-end/.github/workflows/deploy_template.yaml@master
+    with:
+      tag: latest
+      environment: prod
+    secrets:
+      DOCKER_LOGIN: ${{ secrets.DOCKER_LOGIN }}
+      DOCKER_NAME: ${{ secrets.DOCKER_NAME }}
+      DOCKER_PWD: ${{ secrets.DOCKER_PWD }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      ENVFILE: ${{ secrets.ENVFILE }}
+      BUCKET_NAME: ${{ secrets.BUCKET_NAME }}

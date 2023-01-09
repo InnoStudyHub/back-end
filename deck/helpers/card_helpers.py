@@ -30,6 +30,14 @@ def uploadPublicFileToStorage(bucket_name, contents, destination_blob_name):
     return blob.public_url
 
 
+def downloadFileFromStorage(bucket_name, blob_destination):
+    logger.info("Downloading file from storage")
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(blob_destination)
+    return blob.download_as_string()
+
+
 def uploadImage(files, deck_id, image_key):
     file = files.get(image_key)
     deck = Deck.objects.get(deck_id=deck_id)
