@@ -44,9 +44,9 @@ jobs:
       DOCKER_PWD: ${{ secrets.DOCKER_PWD }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_KEY: ${{ secrets.SSH_KEY }}
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      ENVFILE: ${{ secrets.ENVFILE }}
-      BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+      SSH_HOST: ${{ secrets.SSH_HOST_DEV }}
+      ENVFILE: ${{ secrets.ENVFILE_DEV }}
+      BUCKET_NAME: ${{ secrets.BUCKET_NAME_DEV }}
 
   deploy-prod:
     if: github.ref == 'refs/heads/master'
@@ -61,6 +61,6 @@ jobs:
       DOCKER_PWD: ${{ secrets.DOCKER_PWD }}
       SSH_USER: ${{ secrets.SSH_USER }}
       SSH_KEY: ${{ secrets.SSH_KEY }}
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      ENVFILE: ${{ secrets.ENVFILE }}
-      BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+      SSH_HOST: ${{ secrets.SSH_HOST_PROD }}
+      ENVFILE: ${{ secrets.ENVFILE_DEV }}
+      BUCKET_NAME: ${{ secrets.BUCKET_NAME_PROD }}
