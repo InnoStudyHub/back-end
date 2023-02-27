@@ -189,6 +189,12 @@ DATABASES = {
     }
 }
 
+ANALYTIC_DATABASE_NAME = ''
+
+DATABASES_ROUTE = {
+    'analytic': 'analytic_db'
+}
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
