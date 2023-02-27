@@ -67,7 +67,7 @@ ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOSTS', '*')]
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "X-API-KEY",
 ]
@@ -149,6 +149,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CSRF_TRUSTED_ORIGINS=['https://*.studyhub.kz']
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 
