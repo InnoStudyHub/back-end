@@ -28,10 +28,9 @@ def register_iu_user(access_token, refresh_token):
     user = User.objects.get(email=data['email'])
     user.iu_access_token = access_token
     user.iu_refresh_token = refresh_token
+    user.set_password(register_data['password'])
     user.save()
-
     tokens = MyTokenObtainPairSerializer(register_data).validate(register_data)
-
     setup_courses(user)
 
     return tokens
