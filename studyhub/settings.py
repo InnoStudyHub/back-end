@@ -150,6 +150,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CSRF_TRUSTED_ORIGINS=['https://*.studyhub.kz']
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 
