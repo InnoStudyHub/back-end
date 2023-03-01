@@ -3,8 +3,8 @@ import json
 import requests
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 
+from analytic.helpers import get_user_analytic
 from analytic.models import AppLaunchModel
 from studyhub.settings import logger
 
@@ -37,14 +37,11 @@ class AppLaunchSerializer(serializers.Serializer):
         country = data.get('country')
         region_name = data.get('regionName')
         city = data.get('city')
-        is_logged = True
 
-        if user_id is None:
-            is_logged = False
+        user_analytic = get_user_analytic(user_id)
+        user_analytic.app_launches += 1
+        user_analytic.save()
 
         return AppLaunchModel.objects.create(platform=platform, ip_address=ip_address,
-                                             is_logged=is_logged, country=country,
+                                             user_analytic=user_analytic, country=country,
                                              region_name=region_name, city=city)
-
-
-

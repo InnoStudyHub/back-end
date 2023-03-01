@@ -68,11 +68,11 @@ class User(AbstractBaseUser):
         verbose_name_plural = 'Users'
 
 
-class UserAnalytic(models.Model):
+class StudyhubUserAnalyticModel(models.Model):
     id = models.AutoField(primary_key=True)
     user_analytic_id = models.IntegerField()
-    studyhub_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    studyhub_user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'user_analytic'
+        db_table = 'studyhub_user_analytic'
 
