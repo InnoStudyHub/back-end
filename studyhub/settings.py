@@ -90,7 +90,8 @@ INSTALLED_APPS = [
     'user',
     'deck',
     'user_action',
-    'studyhub'
+    'studyhub',
+    'analytic'
 ]
 
 # API Setup
@@ -186,14 +187,26 @@ DATABASES = {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4'
         }
+    },
+    'analytic_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'studyhub_analytic',
+        'USER': 'diazzzu',
+        'PASSWORD': 'pass1234',
+        'HOST': '0.0.0.0',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4'
+        }
     }
 }
-
-ANALYTIC_DATABASE_NAME = ''
 
 DATABASES_ROUTE = {
     'analytic': 'analytic_db'
 }
+
+DATABASE_ROUTERS = ['analytic.routers.AnalyticRouter', ]
 
 
 # Password validation

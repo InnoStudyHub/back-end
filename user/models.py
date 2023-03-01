@@ -34,6 +34,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
     fullname = models.CharField(verbose_name='Fullname', max_length=255)
+    study_year = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     favourite_decks = models.ManyToManyField('deck.Deck')
@@ -65,3 +66,13 @@ class User(AbstractBaseUser):
         db_table = 'user'
         verbose_name = 'User'
         verbose_name_plural = 'Users'
+
+
+class UserAnalytic(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_analytic_id = models.IntegerField()
+    studyhub_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'user_analytic'
+

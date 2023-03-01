@@ -17,6 +17,7 @@ urlpatterns = [
     path('folder/', include('deck.urls.folder_urls')),
     path('courses/', include('deck.urls.course_urls')),
     path('user/', include('user_action.urls')),
+    path('analytic/', include('analytic.urls')),
     path('api/health_check/', include('health_check.urls')),
 ]
 

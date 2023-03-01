@@ -1,31 +1,21 @@
 from django.db import models
 
-from user.models import User
-
-
-class UserAnalytic(models.Model):
-    user_analytic_id = models.AutoField(primary_key=True)
-    studyhub_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    class Meta:
-        db_table = 'user_analytic'
-
-
-class UserProperties(models.Model):
-    user_properties_id = models.AutoField(primary_key=True)
-    user_analytic_id = models.ForeignKey(UserAnalytic, on_delete=models.CASCADE)
-    launch_count = models.IntegerField(default=0)
+class AppLaunchModel(models.Model):
+    app_launch_id = models.AutoField(primary_key=True)
     platform = models.CharField(max_length=256)
-    year = models.IntegerField(blank=True, null=True)
+    ip_address = models.CharField(max_length=256, blank=True, null=True)
+    is_logged = models.BooleanField(default=False)
     country = models.CharField(max_length=256, blank=True, null=True)
+    region_name = models.CharField(max_length=256, blank=True, null=True)
+    city = models.CharField(max_length=256, blank=True, null=True)
 
     class Meta:
-        db_table = 'user_properties'
+        db_table = 'app_launch'
 
 
-class AppEvents(models.Model):
+class AppEventsModel(models.Model):
     app_event_id = models.AutoField(primary_key=True)
-    user_analytic_id = models.ForeignKey(UserAnalytic, on_delete=models.CASCADE)
+    user_analytic_id = models.ForeignKey(AppLaunchModel, on_delete=models.CASCADE)
     session_start_time = models.DateTimeField(blank=True, null=True)
     session_end_time = models.DateTimeField(blank=True, null=True)
     app_background_time = models.DateTimeField(blank=True, null=True)

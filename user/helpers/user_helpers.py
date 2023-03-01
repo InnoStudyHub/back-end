@@ -68,6 +68,8 @@ def setup_courses(user: User):
         elif first_dt_access.year == 2021:
             year = 2
 
+    user.study_year = year
+    user.save()
     courses = Courses.objects.filter(year=year)
     for course in courses:
         folder = Folder.objects.get_or_create(folder_name=course.course_name)
