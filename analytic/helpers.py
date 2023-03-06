@@ -1,4 +1,6 @@
-from analytic.models import UserAnalyticModel
+import datetime
+
+from analytic.models import UserAnalyticModel, EventsModel
 from user.models import StudyhubUserAnalyticModel
 
 
@@ -18,3 +20,16 @@ def get_user_analytic(user_id):
         user_analytic = UserAnalyticModel.objects.get(user_analytic_id=user_analytic_id)
 
     return user_analytic
+
+
+def add_event(user, event_category):
+    user_id = None
+    if user.is_authenticated:
+        user_id = user.id
+
+    user_analytic = get_user_analytic(user_id)
+
+    now = datetime.datetime.now()
+
+    EventsModel.objects.create(event_category=event_category, user_analytic=user_analytic,
+                               event_time=now)

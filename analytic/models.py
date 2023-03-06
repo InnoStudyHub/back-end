@@ -26,7 +26,6 @@ class AppLaunchModel(models.Model):
 class EventsCategoryModel(models.Model):
     event_category_id = models.AutoField(primary_key=True)
     event_category_name = models.CharField(max_length=256)
-    event_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         db_table = 'event_category'
@@ -36,6 +35,7 @@ class EventsModel(models.Model):
     event_id = models.AutoField(primary_key=True)
     user_analytic = models.ForeignKey(UserAnalyticModel, on_delete=models.CASCADE)
     event_category = models.ForeignKey(EventsCategoryModel, on_delete=models.CASCADE)
+    event_time = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         db_table = 'events'

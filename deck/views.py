@@ -7,6 +7,8 @@ from rest_framework.utils import json
 from rest_framework.views import APIView
 from rest_framework_api_key.permissions import HasAPIKey
 
+from analytic.helpers import add_event
+from analytic.models import EventsCategoryModel
 from deck.helpers.deck_helpers import logger, getDeckData
 from deck.serializers.deck_serializer import DeckCreateSerializer, DeckRequestSerializer, \
     DeckDetailSerializer, DeckFromSheetSerializer
@@ -38,6 +40,7 @@ class DeckViewSet(viewsets.ViewSet):
 
         serializer.save(author_id=user.id, files=request.data)
         response_data = getDeckData(serializer.instance, user)
+        add_event(request.user, EventsCategoryModel.objects.get(event_category_name='Deck created'))
         return Response(response_data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -60,6 +63,7 @@ class DeckViewSet(viewsets.ViewSet):
 
         serializer.save(author_id=user.id)
         response_data = getDeckData(serializer.instance, user)
+        add_event(request.user, EventsCategoryModel.objects.get(event_category_name='Deck created from google sheet'))
         return Response(response_data, status=status.HTTP_201_CREATED)
 
     @extend_schema(

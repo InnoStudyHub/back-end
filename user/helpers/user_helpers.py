@@ -5,6 +5,8 @@ import jwt
 
 import requests
 
+from analytic.helpers import add_event
+from analytic.models import EventsCategoryModel
 from deck.models import Courses, Folder, UserFolderPermission
 from studyhub import settings
 from user.models import User
@@ -32,7 +34,7 @@ def register_iu_user(access_token, refresh_token):
     user.save()
     tokens = MyTokenObtainPairSerializer(register_data).validate(register_data)
     setup_courses(user)
-
+    add_event(user, EventsCategoryModel.objects.get(event_category_name='Login from iu account'))
     return tokens
 
 

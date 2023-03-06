@@ -14,9 +14,12 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from analytic.helpers import add_event
+from analytic.models import EventsCategoryModel
 from studyhub import settings
 from studyhub.settings import logger
 from .helpers.user_helpers import register_iu_user
+from .models import User
 from .serializers import MyTokenObtainPairSerializer, UserSerializer
 from .serializers import RegistrationSerializer
 
@@ -39,6 +42,7 @@ class RegistrationAPIView(GenericAPIView):
         user = serializer.save()
         tokens = MyTokenObtainPairSerializer(request.data).validate(request.data)
         logger.info(f"User created: {user}")
+        add_event(user, EventsCategoryModel.objects.get(event_category_name='Register'))
         return Response(tokens, status=status.HTTP_201_CREATED)
 
 
@@ -52,7 +56,10 @@ class MyObtainTokenPairView(TokenObtainPairView):
     )
     def post(self, request, *args, **kwargs):
         logger.info(f"Handle login user request: {request.data}")
-        return super().post(request, args, kwargs)
+        response = super().post(request, args, kwargs)
+        user = User.objects.get(email=request.data.get('email'))
+        add_event(user, EventsCategoryModel.objects.get(event_category_name='Login from email'))
+        return response
 
 
 class MyTokenRefreshView(TokenRefreshView):
@@ -75,6 +82,7 @@ class LogoutAPIView(APIView):
                 id__in=BlacklistedToken.objects.filter(token__user=user).values_list('token_id', flat=True)):
             BlacklistedToken.objects.create(token=token)
         logger.info(f"User logged out: {user}")
+        add_event(user, EventsCategoryModel.objects.get(event_category_name='Logout'))
         return Response("Successfully logout", status=status.HTTP_200_OK)
 
 
