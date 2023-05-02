@@ -237,7 +237,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 #DEFAULT_FILE_STORAGE = 'studyhub.storage.GoogleCloudMediaStorage'
-STATIC_URL = f'https://storage.yandexcloud.net/studyhub-static/'
+STATIC_URL = f'https://storage.yandexcloud.net/studyhub-main/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
