@@ -58,16 +58,16 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 
 AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
-AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', 'YCAJEGJVlCq8I54Bi5FscGJrN')
-AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY', 'YCNJhj2xQNm6qL5zTiJPXosKEFQjy58vqZIcIXl5')
-AWS_STORAGE_BUCKET_NAME = 'studyhub-static'
+AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID')
+AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('BUCKET_STATIC_NAME')
 AWS_QUERYSTRING_AUTH = False
 
 # Setup boto3
 s3_client = boto3.session.Session().client(
     service_name='s3',
-    aws_access_key_id='YCAJEGJVlCq8I54Bi5FscGJrN',
-    aws_secret_access_key='YCNJhj2xQNm6qL5zTiJPXosKEFQjy58vqZIcIXl5',
+    aws_access_key_id=os.environ.get('AWS_S3_ACCESS_KEY_ID'),
+    aws_secret_access_key=os.environ.get('AWS_S3_SECRET_ACCESS_KEY'),
     endpoint_url='https://storage.yandexcloud.net',
 )
 
@@ -236,7 +236,7 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = f'https://storage.yandexcloud.net/studyhub-static/'
+STATIC_URL = f'https://storage.yandexcloud.net/{AWS_STORAGE_BUCKET_NAME}/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

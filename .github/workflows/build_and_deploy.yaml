@@ -47,6 +47,7 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       ENVFILE: ${{ secrets.ENVFILE }}
       BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+      BUCKET_STATIC_NAME: ${{ secrets.BUCKET_STATIC_NAME }}
       AWS_S3_ACCESS_KEY_ID: ${{ secrets.AWS_S3_ACCESS_KEY_ID }}
       AWS_S3_SECRET_ACCESS_KEY: ${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
 
