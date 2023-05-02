@@ -10,8 +10,9 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DEBUG=${DEBUG}
-      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
       - BUCKET_NAME=${BUCKET_NAME}
+      - AWS_S3_ACCESS_KEY_ID=${AWS_S3_ACCESS_KEY_ID}
+      - AWS_S3_SECRET_ACCESS_KEY=${AWS_S3_SECRET_ACCESS_KEY}
     command: >
             bash -c "python manage.py makemigrations && python manage.py migrate 
             && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"

@@ -60,7 +60,7 @@ STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
 AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
 AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', 'YCAJEGJVlCq8I54Bi5FscGJrN')
 AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY', 'YCNJhj2xQNm6qL5zTiJPXosKEFQjy58vqZIcIXl5')
-AWS_STORAGE_BUCKET_NAME = 'studyhub-main'
+AWS_STORAGE_BUCKET_NAME = 'studyhub-static'
 AWS_QUERYSTRING_AUTH = False
 
 # Setup boto3
@@ -236,8 +236,7 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-#DEFAULT_FILE_STORAGE = 'studyhub.storage.GoogleCloudMediaStorage'
-STATIC_URL = f'https://storage.yandexcloud.net/studyhub-main/'
+STATIC_URL = f'https://storage.yandexcloud.net/studyhub-static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
