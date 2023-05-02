@@ -15,8 +15,6 @@ services:
     command: >
             bash -c "python manage.py makemigrations && python manage.py migrate 
             && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - .data:/studyhub/data
     network_mode: "host"
     ports:
       - "8000:8000"
