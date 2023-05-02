@@ -242,3 +242,4 @@ class UserLogsView(viewsets.ViewSet):
         deck_opened[0].save()
         logger.info(f"Saved opened deck log, deck_view_id - {deck_opened[0].deck_view_id}")
         return Response(status=status.HTTP_200_OK)
+
