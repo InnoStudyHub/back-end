@@ -53,11 +53,11 @@ LOGGING = {
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
 
 #Google Cloud settings
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '.data/google_cloud_key.json')
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-GS_BUCKET_NAME = 'studyhub-static'
-GS_DATA_BUCKET_NAME = os.environ.get('BUCKET_NAME', 'studyhub-data-dev')
-GS_PROJECT_ID = 'studyhub-372200'
+#os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '.data/google_cloud_key.json')
+#GS_CREDENTIALS = service_account.Credentials.from_service_account_file(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+#GS_BUCKET_NAME = 'studyhub-static'
+#GS_DATA_BUCKET_NAME = os.environ.get('BUCKET_NAME', 'studyhub-data-dev')
+#GS_PROJECT_ID = 'studyhub-372200'
 
 # Debug mode
 DEBUG = os.environ.get('DEBUG', "True") == "True"
@@ -224,9 +224,9 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-DEFAULT_FILE_STORAGE = 'studyhub.storage.GoogleCloudMediaStorage'
-STATICFILES_STORAGE = 'studyhub.storage.GoogleCloudStaticStorage'
-STATIC_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
+#DEFAULT_FILE_STORAGE = 'studyhub.storage.GoogleCloudMediaStorage'
+#STATICFILES_STORAGE = 'studyhub.storage.GoogleCloudStaticStorage'
+#STATIC_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
