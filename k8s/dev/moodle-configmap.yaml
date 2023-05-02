@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: moodle-config
-  labels:
-    env: dev
-data:
-  MOODLE_URL: 'dev.moodle.innopolis.university/webservice/rest/server.php'
-  MOODLE_TOKEN: 'f1cc7bed428ef04b92943587e41a03af'

@@ -5,14 +5,14 @@ import re
 import PIL.Image
 from PIL.ImageFile import ImageFile
 from django.core.files.uploadedfile import UploadedFile
-from google.cloud import storage
 from openpyxl.reader.excel import load_workbook
 from openpyxl_image_loader import SheetImageLoader
 from rest_framework.exceptions import ValidationError
 
 from deck.dtos.image_dto import Image
 from deck.models import Deck
-from studyhub.settings import logger, GS_DATA_BUCKET_NAME
+from studyhub.settings import logger, s3_client, AWS_STORAGE_BUCKET_NAME
+from django.core.files.storage import default_storage
 
 
 def isImage(image):
@@ -21,21 +21,14 @@ def isImage(image):
 
 def uploadPublicFileToStorage(bucket_name, contents, destination_blob_name):
     logger.info("Uploading image to storage")
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
-    blob.upload_from_string(contents)
-    blob.make_public()
-    logger.info(f"Image successfully upload {blob.public_url}")
-    return blob.public_url
-
-
-def downloadFileFromStorage(bucket_name, blob_destination):
-    logger.info("Downloading file from storage")
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(blob_destination)
-    return blob.download_as_string()
+    s3_client.put_object(
+        Bucket=bucket_name,
+        Key=destination_blob_name,
+        Body=contents,
+        ContentType='image/jpg',
+        ACL='public-read',
+    )
+    return f'https://storage.yandexcloud.net/{bucket_name}/{destination_blob_name}'
 
 
 def uploadImage(files, deck_id, image_key):
@@ -44,8 +37,7 @@ def uploadImage(files, deck_id, image_key):
     folder_name = deck.folder.folder_name
     extension = file.name.split('.')[-1]
     store_path = f'decks/{folder_name}/{deck.semester}/{deck_id}_{deck.deck_name}/{image_key}.{extension}'
-    bucket_name = GS_DATA_BUCKET_NAME
-    return uploadPublicFileToStorage(bucket_name, file.read(), store_path)
+    return uploadPublicFileToStorage(AWS_STORAGE_BUCKET_NAME, file.read(), store_path)
 
 
 def getQuestionImageUrl(question_image_key, files, deck_id):

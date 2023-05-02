@@ -1,9 +1,10 @@
 import logging
+import os
+import boto3
+
 from datetime import timedelta
 from pathlib import Path
-import os
 from corsheaders.defaults import default_headers
-from google.oauth2 import service_account
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -52,12 +53,23 @@ LOGGING = {
 # Secrets
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-mw_n2-#0p-4p-asm7_f+sm8sck8bej&t7#jgcyn1z-ano(#mun')
 
-#Google Cloud settings
-#os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '.data/google_cloud_key.json')
-#GS_CREDENTIALS = service_account.Credentials.from_service_account_file(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-#GS_BUCKET_NAME = 'studyhub-static'
-#GS_DATA_BUCKET_NAME = os.environ.get('BUCKET_NAME', 'studyhub-data-dev')
-#GS_PROJECT_ID = 'studyhub-372200'
+# Yandex Object Storage settings
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+
+AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
+AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', 'YCAJEGJVlCq8I54Bi5FscGJrN')
+AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY', 'YCNJhj2xQNm6qL5zTiJPXosKEFQjy58vqZIcIXl5')
+AWS_STORAGE_BUCKET_NAME = 'studyhub-main'
+AWS_QUERYSTRING_AUTH = False
+
+# Setup boto3
+s3_client = boto3.session.Session().client(
+    service_name='s3',
+    aws_access_key_id='YCAJEGJVlCq8I54Bi5FscGJrN',
+    aws_secret_access_key='YCNJhj2xQNm6qL5zTiJPXosKEFQjy58vqZIcIXl5',
+    endpoint_url='https://storage.yandexcloud.net',
+)
 
 # Debug mode
 DEBUG = os.environ.get('DEBUG', "True") == "True"
@@ -225,8 +237,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 #DEFAULT_FILE_STORAGE = 'studyhub.storage.GoogleCloudMediaStorage'
-#STATICFILES_STORAGE = 'studyhub.storage.GoogleCloudStaticStorage'
-#STATIC_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
+STATIC_URL = f'https://storage.yandexcloud.net/studyhub-static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
