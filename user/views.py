@@ -14,6 +14,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+import analytic.producer
 from studyhub import settings
 from studyhub.settings import logger
 from .helpers.user_helpers import register_iu_user
@@ -82,8 +83,8 @@ class UserAPIView(GenericAPIView):
     permission_classes = (IsAuthenticated, HasAPIKey)
     serializer_class = UserSerializer
 
-    def get(self, request, *args, **kwargs):
-        return JsonResponse(self.request.user)
+    def get(self, request):
+        return Response(request.user.fullname, status=200)
 
 
 class UserIULoginView(viewsets.ViewSet):
